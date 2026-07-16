@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrintlyHive Design Studio for Customers</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Pacifico&family=Dancing+Script:wght@700&family=Great+Vibes&family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        .pattern-grid {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        /* Custom scrollbar for sidebar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        /* Hide settings panel by default */
+        .settings-panel {
+            display: none;
+        }
+        .settings-panel.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 flex flex-col md:flex-row font-sans overflow-hidden">
+
+    <!-- LEFT PANEL: Editor -->
+    <div class="w-full md:w-[400px] bg-white border-r border-gray-200 shadow-xl z-10 flex flex-col h-screen overflow-y-auto">
+        <div class="p-6 bg-slate-900 text-white flex-shrink-0">
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                ✨ PrintlyHive
+            </h1>
+            <p class="text-sm text-slate-300 mt-1">Design Studio for Customers</p>
+        </div>
+
+        <div class="flex-1 p-6 space-y-8">
+            
+            <section class="space-y-4">
+                <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-2">1. Design Settings</h2>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Occasion</label>
+                    <div id="occasion-container">
+                        <!-- Filled by JS -->
+                        <select id="occasion-select" class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Theme Style</label>
+                    <div id="theme-buttons" class="grid grid-cols-2 gap-2">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Color Palette</label>
+                    <div id="palette-buttons" class="flex flex-wrap gap-3">
+                        <!-- Filled by JS -->
+                    </div>
+                </div>
+            </section>
+
+            <section class="space-y-4">
+                <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-2">2. Card Details</h2>
+                
+                <div id="form-fields" class="space-y-3">
+                    <!-- Fields dynamically generated via JS to reduce HTML bloat and attach events cleanly -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Download Action -->
+        <div class="p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex-shrink-0">
+            <button id="download-btn" class="w-full py-3 px-4 rounded-xl text-white font-bold text-lg flex items-center justify-center gap-2 transition-all bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:-translate-y-0.5">
+                <svg id="download-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <svg id="loading-icon" class="animate-spin hidden h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span id="download-text">Download Design</span>
+            </button>
+            <p class="text-center text-xs text-gray-500 mt-2">Downloads a high-res PNG file</p>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Live Preview Area -->
+    <div class="flex-1 overflow-auto flex flex-col relative items-center justify-center bg-[#f0f2f5] p-4 md:p-12 pattern-grid h-screen">
+        
+        <!-- Helper Tooltip -->
+        <div class="absolute top-6 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 text-sm text-gray-500 flex items-center gap-2 z-10">
+            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            Live Preview (5x7 Ratio)
+        </div>
+
+        <!-- Card Wrapper -->
+        <div class="w-full max-w-[500px] shadow-2xl transition-all duration-500 ease-in-out flex-shrink-0 relative my-auto">
+            
+            <!-- Actual Card Content to be captured -->
+            <div id="invitation-card-capture" class="relative w-full overflow-hidden flex flex-col items-center text-center px-8 py-12 transition-colors duration-500" style="aspect-ratio: 5 / 7;">
+                
+                <!-- Background Decorations injected here -->
+                <div id="preview-decorations" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+
+                <!-- Typography Content Wrapper -->
+                <div class="relative z-10 flex flex-col items-center justify-between h-full w-full py-4">
+                    
+                    <!-- Header Section -->
+                    <div class="flex flex-col items-center gap-4 w-full">
+                        <p id="preview-hostText" class="text-sm md:text-base tracking-widest uppercase opacity-80 whitespace-pre-line"></p>
+                        <h2 id="preview-title" class="text-4xl md:text-5xl my-2 leading-tight px-4 whitespace-pre-line"></h2>
+                        <p id="preview-subtitle" class="text-xs md:text-sm tracking-[0.2em] uppercase opacity-70 whitespace-pre-line"></p>
+                    </div>
+
+                    <!-- Main Subject Section -->
+                    <div class="my-6 z-10 relative w-full">
+                        <h1 id="preview-name" class="text-5xl md:text-6xl font-bold leading-tight whitespace-pre-line"></h1>
+                    </div>
+
+                    <!-- Event Details Section -->
+                    <div class="flex flex-col items-center gap-4 w-full px-4 pb-24 z-10 relative">
+                        <div id="preview-date-time-container" class="flex flex-col items-center gap-1 w-full border-t border-b py-3">
+                            <p id="preview-date" class="font-semibold text-base md:text-lg tracking-wide uppercase whitespace-pre-line"></p>
+                            <p id="preview-time" class="text-sm md:text-base opacity-80 whitespace-pre-line"></p>
+                        </div>
+
+                        <div id="preview-location" class="whitespace-pre-line text-sm md:text-base opacity-90 leading-relaxed font-medium"></div>
+                        <div id="preview-rsvp" class="whitespace-pre-line text-xs md:text-sm mt-1 opacity-90 font-bold"></div>
+                        
+                        <div id="preview-registry-container" class="mt-2 bg-white/60 px-4 py-1.5 rounded-full shadow-sm backdrop-blur-md transition-opacity">
+                            <div id="preview-registry" class="text-[10px] md:text-xs tracking-widest uppercase opacity-90"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Subtle shadow underneath -->
+        <div class="mt-8 w-3/4 max-w-[400px] h-4 bg-black/10 blur-xl rounded-[100%] flex-shrink-0"></div>
+    </div>
+
+    <script>
+        // Data Structures
+        const OCCASIONS = ["Baby Shower", "Birthday", "Wedding", "Bridal Shower", "Graduation"];
+
+        const THEMES = {
+            "Safari Jungle": {
+                fontTitle: "'Great Vibes', cursive",
+                fontBody: "'Montserrat', sans-serif",
+                decorations: (colors) => `
+                    <div class="absolute top-0 left-0 w-full flex justify-between px-4 pt-2 text-6xl opacity-80" style="color: ${colors.primary}">
+                        <span class="transform -scale-x-100 rotate-12">🌿</span>
+                        <span class="transform -translate-y-4">🍃</span>
+                        <span class="rotate-12">🌿</span>
+                    </div>
+                    <div class="absolute bottom-10 w-full flex justify-center items-end gap-3 z-0">
+                        <span class="text-6xl transform scale-x-100 -rotate-6 drop-shadow-md">🐘</span>
+                        <span class="text-7xl transform -translate-y-2 drop-shadow-md">🦒</span>
+                        <span class="text-5xl transform -scale-x-100 rotate-6 drop-shadow-md">🦁</span>
+                    </div>
+                    <div class="absolute inset-0 opacity-[0.03] pointer-events-none" 
+                         style="background-image: radial-gradient(${colors.primary} 1px, transparent 1px); background-size: 20px 20px"></div>
+                `
+            },
+            "Boho Floral": {
+                fontTitle: "'Playfair Display', serif",
+                fontBody: "'Montserrat', sans-serif",
+                decorations: (colors) => `
+                    <div class="absolute -top-4 -left-4 text-8xl opacity-90 drop-shadow-sm transform -rotate-45">🌸</div>
+                    <div class="absolute top-8 -left-2 text-6xl opacity-80 drop-shadow-sm transform rotate-12">🌺</div>
+                    <div class="absolute -bottom-4 -right-4 text-8xl opacity-90 drop-shadow-sm transform rotate-135">🌸</div>
+                    <div class="absolute bottom-8 -right-2 text-6xl opacity-80 drop-shadow-sm transform -rotate-12">🌺</div>
+                    <div class="absolute top-0 right-0 p-4 text-4xl opacity-60">🌿</div>
+                    <div class="absolute bottom-0 left-0 p-4 text-4xl opacity-60 transform -scale-x-100">🌿</div>
+                    <div class="absolute inset-4 border border-opacity-30 rounded-lg pointer-events-none" style="border-color: ${colors.primary}"></div>
+                `
+            },
+            "Modern Minimalist": {
+                fontTitle: "'Montserrat', sans-serif",
+                fontBody: "'Montserrat', sans-serif",
+                decorations: (colors) => `
+                    <div class="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-20" style="background-color: ${colors.primary}"></div>
+                    <div class="absolute bottom-0 left-0 w-48 h-48 rounded-tr-full opacity-20" style="background-color: ${colors.secondary}"></div>
+                    <div class="absolute top-1/2 left-4 w-1 h-32 transform -translate-y-1/2 opacity-30" style="background-color: ${colors.primary}"></div>
+                    <div class="absolute top-1/2 right-4 w-1 h-32 transform -translate-y-1/2 opacity-30" style="background-color: ${colors.secondary}"></div>
+                `
+            },
+            "Cosmic Space": {
+                fontTitle: "'Playfair Display', serif",
+                fontBody: "'Montserrat', sans-serif",
+                decorations: (colors) => `
+                    <div class="absolute inset-0 opacity-10" style="background-color: ${colors.secondary}"></div>
+                    <div class="absolute top-8 left-8 text-4xl opacity-80 animate-pulse">✨</div>
+                    <div class="absolute top-16 right-12 text-3xl opacity-60">⭐</div>
+                    <div class="absolute bottom-24 left-10 text-2xl opacity-70">🌟</div>
+                    <div class="absolute top-32 left-4 text-6xl opacity-90 transform -rotate-12">🌙</div>
+                    <div class="absolute bottom-12 right-8 text-7xl opacity-90 transform rotate-12">🚀</div>
+                    <div class="absolute top-1/2 right-6 text-5xl opacity-50">🪐</div>
+                `
+            },
+            "Ocean Under Sea": {
+                fontTitle: "'Pacifico', cursive",
+                fontBody: "'Montserrat', sans-serif",
+                decorations: (colors) => `
+                    <div class="absolute top-10 left-10 text-3xl opacity-60 animate-pulse">🫧</div>
+                    <div class="absolute top-32 right-12 text-4xl opacity-50">🫧</div>
+                    <div class="absolute bottom-40 left-8 text-2xl opacity-70">🫧</div>
+                    <div class="absolute top-4 right-4 text-6xl opacity-80 transform -rotate-12">🐠</div>
+                    <div class="absolute top-1/2 left-2 text-5xl opacity-40 transform rotate-45">🐢</div>
+                    <div class="absolute bottom-10 w-full flex justify-center items-end gap-6 z-0">
+                        <span class="text-6xl transform scale-x-100 rotate-12 drop-shadow-md">🦀</span>
+                        <span class="text-7xl transform -translate-y-4 drop-shadow-md">🐙</span>
+                        <span class="text-5xl transform -scale-x-100 -rotate-12 drop-shadow-md">🐡</span>
+                    </div>
+                    <div class="absolute bottom-6 left-0 text-6xl opacity-60 transform -rotate-12 translate-y-2">🌿</div>
+                    <div class="absolute bottom-6 right-0 text-6xl opacity-60 transform scale-x-100 rotate-12 translate-y-2">🌿</div>
+                `
+            },
+            "Rustic Winter": {
+                fontTitle: "'Playfair Display', serif",
+                fontBody: "'Montserrat', sans-serif",
+                decorations: (colors) => `
+                    <div class="absolute inset-5 border-2 border-opacity-40 pointer-events-none" style="border-color: ${colors.primary}"></div>
+                    <div class="absolute top-8 left-8 text-4xl opacity-60">❄️</div>
+                    <div class="absolute top-12 right-10 text-3xl opacity-50">❅</div>
+                    <div class="absolute bottom-1/4 right-6 text-4xl opacity-40">❄️</div>
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 text-6xl opacity-80">🦌</div>
+                    <div class="absolute bottom-8 left-4 text-6xl opacity-70">🌲</div>
+                    <div class="absolute bottom-8 right-4 text-5xl opacity-70">🌲</div>
+                    <div class="absolute bottom-8 left-16 text-4xl opacity-50">🎄</div>
+                `
+            },
+            "Vintage Art Deco": {
+                fontTitle: "'Cinzel', serif",
+                fontBody: "'Montserrat', sans-serif",
+                decorations: (colors) => `
+                    <div class="absolute inset-4 border-2 border-opacity-80 pointer-events-none" style="border-color: ${colors.secondary}"></div>
+                    <div class="absolute inset-6 border border-opacity-50 pointer-events-none" style="border-color: ${colors.secondary}"></div>
+                    <div class="absolute top-4 left-4 w-12 h-12 border-t-4 border-l-4 opacity-80" style="border-color: ${colors.secondary}"></div>
+                    <div class="absolute top-4 right-4 w-12 h-12 border-t-4 border-r-4 opacity-80" style="border-color: ${colors.secondary}"></div>
+                    <div class="absolute bottom-4 left-4 w-12 h-12 border-b-4 border-l-4 opacity-80" style="border-color: ${colors.secondary}"></div>
+                    <div class="absolute bottom-4 right-4 w-12 h-12 border-b-4 border-r-4 opacity-80" style="border-color: ${colors.secondary}"></div>
+                    <div class="absolute top-6 left-1/2 transform -translate-x-1/2 text-2xl opacity-90" style="color: ${colors.secondary}">❖</div>
+                    <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-2xl opacity-90" style="color: ${colors.secondary}">❖</div>
+                    <div class="absolute inset-0 opacity-[0.02] pointer-events-none" 
+                         style="background-image: repeating-linear-gradient(45deg, ${colors.secondary} 0, ${colors.secondary} 1px, transparent 0, transparent 50%); background-size: 10px 10px"></div>
+                `
+            }
+        };
+
+        const COLOR_PALETTES = {
+            "Safari Jungle": [
+                { name: "Jungle Green", primary: "#2c5e3b", secondary: "#e8c972", text: "#333333", bg: "#fdfbf7" },
+                { name: "Sunset Savannah", primary: "#d35400", secondary: "#f39c12", text: "#4a3b32", bg: "#fffaf0" },
+                { name: "Neutral Earth", primary: "#7f8c8d", secondary: "#bdc3c7", text: "#2c3e50", bg: "#f4f6f7" }
+            ],
+            "Boho Floral": [
+                { name: "Rose Gold", primary: "#b76e79", secondary: "#e0bfb8", text: "#4a4a4a", bg: "#fffafb" },
+                { name: "Dusty Blue", primary: "#6b8e23", secondary: "#a0b2c6", text: "#2c3e50", bg: "#f0f8ff" },
+                { name: "Lavender", primary: "#8e44ad", secondary: "#d2b4de", text: "#342244", bg: "#faf5ff" }
+            ],
+            "Modern Minimalist": [
+                { name: "Classic Noir", primary: "#222222", secondary: "#888888", text: "#111111", bg: "#ffffff" },
+                { name: "Navy & Gold", primary: "#2c3e50", secondary: "#d4af37", text: "#1a252f", bg: "#f8f9fa" },
+                { name: "Terracotta", primary: "#e07a5f", secondary: "#f4f1de", text: "#3d405b", bg: "#faf9f6" }
+            ],
+            "Cosmic Space": [
+                { name: "Deep Navy", primary: "#1a2a6c", secondary: "#b21f1f", text: "#ffffff", bg: "#0f172a" },
+                { name: "Purple Nebula", primary: "#4b1248", secondary: "#f0c27b", text: "#fdfdfd", bg: "#1e1b4b" },
+                { name: "Starlight Blue", primary: "#00c6ff", secondary: "#0072ff", text: "#f0f8ff", bg: "#000b18" }
+            ],
+            "Ocean Under Sea": [
+                { name: "Coral Reef", primary: "#ff7f50", secondary: "#20b2aa", text: "#004d40", bg: "#e0f7fa" },
+                { name: "Deep Blue", primary: "#01579b", secondary: "#4fc3f7", text: "#ffffff", bg: "#001f3f" },
+                { name: "Sandy Beach", primary: "#00838f", secondary: "#ffb300", text: "#3e2723", bg: "#fff3e0" }
+            ],
+            "Rustic Winter": [
+                { name: "Frosty Pine", primary: "#2e4a3d", secondary: "#8ba8a0", text: "#1a2a22", bg: "#f0f5f3" },
+                { name: "Midnight Snow", primary: "#1c2833", secondary: "#85c1e9", text: "#fdfefe", bg: "#154360" },
+                { name: "Berry & Wood", primary: "#641e16", secondary: "#d4ac0d", text: "#3e2723", bg: "#fdf7e3" }
+            ],
+            "Vintage Art Deco": [
+                { name: "Gatsby Gold", primary: "#ffffff", secondary: "#d4af37", text: "#f8f9fa", bg: "#111111" },
+                { name: "Emerald Glitz", primary: "#0e6251", secondary: "#f1c40f", text: "#183028", bg: "#e9f7ef" },
+                { name: "Pearl Deco", primary: "#2c3e50", secondary: "#b7950b", text: "#1a252f", bg: "#fdfbf7" }
+            ]
+        };
+
+        const POPULAR_FONTS = [
+            { label: "Theme Default", value: "default" },
+            { label: "Playfair (Serif)", value: "'Playfair Display', serif" },
+            { label: "Cinzel (Serif)", value: "'Cinzel', serif" },
+            { label: "Great Vibes (Script)", value: "'Great Vibes', cursive" },
+            { label: "Pacifico (Script)", value: "'Pacifico', cursive" },
+            { label: "Dancing Script", value: "'Dancing Script', cursive" },
+            { label: "Montserrat (Sans)", value: "'Montserrat', sans-serif" }
+        ];
+
+        const FONT_SIZES = [
+            { label: "Tiny", value: "0.6em" },
+            { label: "Small", value: "0.8em" },
+            { label: "Normal", value: "1em" },
+            { label: "Large", value: "1.2em" },
+            { label: "X-Large", value: "1.4em" },
+            { label: "Huge", value: "1.6em" }
+        ];
+
+        const FORM_CONFIG = [
+            { label: "Host / Intro Line", name: "hostText", type: "text" },
+            { label: "Main Event Title", name: "title", type: "text" },
+            { label: "Subtitle", name: "subtitle", type: "text" },
+            { label: "Honoree Name", name: "name", type: "text" },
+            { label: "Date", name: "date", type: "text" },
+            { label: "Time", name: "time", type: "text" },
+            { label: "Location / Address", name: "location", type: "textarea" },
+            { label: "RSVP Info", name: "rsvp", type: "textarea" },
+            { label: "Additional Info (Registry)", name: "registry", type: "text" },
+        ];
+
+        // App State
+        let state = {
+            occasion: "Baby Shower",
+            theme: "Safari Jungle",
+            paletteIndex: 0,
+            content: {
+                hostText: "Please join us for a",
+                title: "Baby Shower",
+                subtitle: "honoring",
+                name: "Leo Alexander",
+                date: "Saturday, October 24th, 2026",
+                time: "At Two O'Clock in the Afternoon",
+                location: "The Botanical Gardens\n123 Safari Way, Jungle City, OR",
+                rsvp: "RSVP to Sarah by October 10th\n(555) 123-4567",
+                registry: "Registered at Target & Amazon"
+            },
+            fieldStyles: {} // e.g. { hostText: { font: '...', size: '...' } }
+        };
+
+        // Initialize the app
+        function init() {
+            parseUrlParams();
+            buildSidebar();
+            updatePreview();
+            attachDownloadListener();
+        }
+
+        function parseUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            const urlOccasion = params.get('occasion');
+            
+            if (urlOccasion && OCCASIONS.includes(urlOccasion)) {
+                state.occasion = urlOccasion;
+                state.content.title = urlOccasion;
+                document.getElementById('occasion-container').innerHTML = `
+                    <div class="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 flex items-center justify-between cursor-not-allowed">
+                        <span>${state.occasion}</span>
+                        <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            Locked
+                        </span>
+                    </div>
+                `;
+            } else {
+                const select = document.getElementById('occasion-select');
+                select.innerHTML = OCCASIONS.map(occ => `<option value="${occ}" ${occ === state.occasion ? 'selected' : ''}>${occ}</option>`).join('');
+                select.addEventListener('change', (e) => {
+                    state.occasion = e.target.value;
+                    state.content.title = state.occasion; // Auto update title
+                    document.getElementById('input-title').value = state.occasion;
+                    updatePreview();
+                });
+            }
+        }
+
+        function buildSidebar() {
+            buildThemeButtons();
+            buildPaletteButtons();
+            buildFormFields();
+        }
+
+        function buildThemeButtons() {
+            const container = document.getElementById('theme-buttons');
+            container.innerHTML = Object.keys(THEMES).map(t => `
+                <button
+                    onclick="handleThemeChange('${t}')"
+                    id="btn-theme-${t.replace(/\s+/g, '-')}"
+                    class="py-2 px-3 text-sm rounded-lg border text-center transition-all ${state.theme === t ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}"
+                >
+                    ${t}
+                </button>
+            `).join('');
+        }
+
+        function buildPaletteButtons() {
+            const container = document.getElementById('palette-buttons');
+            const palettes = COLOR_PALETTES[state.theme];
+            container.innerHTML = palettes.map((pal, idx) => `
+                <button
+                    onclick="handlePaletteChange(${idx})"
+                    id="btn-palette-${idx}"
+                    class="group flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ${state.paletteIndex === idx ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-transparent hover:bg-gray-100'}"
+                >
+                    <div class="flex overflow-hidden rounded-full border border-gray-200 w-10 h-10 shadow-sm">
+                        <div class="h-full w-1/2" style="background-color: ${pal.primary}"></div>
+                        <div class="h-full w-1/2" style="background-color: ${pal.secondary}"></div>
+                    </div>
+                    <span class="text-[10px] ${state.paletteIndex === idx ? 'text-blue-700 font-bold' : 'text-gray-500'}">
+                        ${pal.name}
+                    </span>
+                </button>
+            `).join('');
+        }
+
+        function buildFormFields() {
+            const container = document.getElementById('form-fields');
+            
+            let fontOptionsHTML = POPULAR_FONTS.map(f => `<option value="${f.value}">${f.label}</option>`).join('');
+            let sizeOptionsHTML = FONT_SIZES.map(s => `<option value="${s.value}" ${s.value === '1em' ? 'selected' : ''}>${s.label}</option>`).join('');
+
+            container.innerHTML = FORM_CONFIG.map(field => `
+                <div class="relative">
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-semibold text-gray-600">${field.label}</label>
+                        <button 
+                            onclick="toggleSettings('${field.name}')"
+                            id="toggle-${field.name}"
+                            class="text-[10px] px-2 py-0.5 rounded transition-colors bg-gray-100 text-gray-500 hover:bg-gray-200"
+                            title="Typography Settings"
+                        >
+                            Aa
+                        </button>
+                    </div>
+
+                    <div id="settings-${field.name}" class="settings-panel gap-2 mb-2 p-2 bg-slate-50 rounded-lg border border-slate-200 shadow-inner">
+                        <div class="flex-1">
+                            <label class="block text-[9px] uppercase tracking-wider text-slate-500 mb-1">Font</label>
+                            <select 
+                                onchange="handleStyleChange('${field.name}', 'font', this.value)"
+                                id="font-${field.name}"
+                                class="w-full text-xs p-1.5 rounded border border-gray-300 bg-white"
+                            >
+                                ${fontOptionsHTML}
+                            </select>
+                        </div>
+                        <div class="w-1/3">
+                            <label class="block text-[9px] uppercase tracking-wider text-slate-500 mb-1">Size</label>
+                            <select 
+                                onchange="handleStyleChange('${field.name}', 'size', this.value)"
+                                id="size-${field.name}"
+                                class="w-full text-xs p-1.5 rounded border border-gray-300 bg-white"
+                            >
+                                ${sizeOptionsHTML}
+                            </select>
+                        </div>
+                    </div>
+
+                    ${field.type === 'textarea' ? 
+                        `<textarea
+                            id="input-${field.name}"
+                            oninput="handleTextChange('${field.name}', this.value)"
+                            rows="2"
+                            class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm resize-none"
+                        >${state.content[field.name]}</textarea>` 
+                        : 
+                        `<input
+                            type="text"
+                            id="input-${field.name}"
+                            value="${state.content[field.name]}"
+                            oninput="handleTextChange('${field.name}', this.value)"
+                            class="w-full p-2 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                        />`
+                    }
+                </div>
+            `).join('');
+        }
+
+        function handleThemeChange(newTheme) {
+            state.theme = newTheme;
+            state.paletteIndex = 0; // Reset palette on theme change
+            buildThemeButtons();
+            buildPaletteButtons();
+            updatePreview();
+        }
+
+        function handlePaletteChange(index) {
+            state.paletteIndex = index;
+            buildPaletteButtons();
+            updatePreview();
+        }
+
+        function handleTextChange(fieldName, value) {
+            state.content[fieldName] = value;
+            updatePreview();
+        }
+
+        function toggleSettings(fieldName) {
+            const panel = document.getElementById(`settings-${fieldName}`);
+            const btn = document.getElementById(`toggle-${fieldName}`);
+            
+            // Close all others
+            document.querySelectorAll('.settings-panel').forEach(p => {
+                if (p.id !== `settings-${fieldName}`) {
+                    p.classList.remove('active');
+                    const otherBtn = document.getElementById(`toggle-${p.id.replace('settings-', '')}`);
+                    if(otherBtn) {
+                        otherBtn.classList.remove('bg-blue-100', 'text-blue-700', 'font-bold');
+                        otherBtn.classList.add('bg-gray-100', 'text-gray-500');
+                    }
+                }
+            });
+
+            if (panel.classList.contains('active')) {
+                panel.classList.remove('active');
+                btn.classList.remove('bg-blue-100', 'text-blue-700', 'font-bold');
+                btn.classList.add('bg-gray-100', 'text-gray-500');
+            } else {
+                panel.classList.add('active');
+                btn.classList.add('bg-blue-100', 'text-blue-700', 'font-bold');
+                btn.classList.remove('bg-gray-100', 'text-gray-500');
+            }
+        }
+
+        function handleStyleChange(fieldName, property, value) {
+            if (!state.fieldStyles[fieldName]) state.fieldStyles[fieldName] = {};
+            state.fieldStyles[fieldName][property] = value;
+            updatePreview();
+        }
+
+        function updatePreview() {
+            const currentPalette = COLOR_PALETTES[state.theme][state.paletteIndex];
+            const currentThemeConfig = THEMES[state.theme];
+
+            // 1. Update Card Background and Base Text Color
+            const captureCard = document.getElementById('invitation-card-capture');
+            captureCard.style.backgroundColor = currentPalette.bg;
+            captureCard.style.color = currentPalette.text;
+
+            // 2. Inject Theme Decorations
+            document.getElementById('preview-decorations').innerHTML = currentThemeConfig.decorations(currentPalette);
+
+            // 3. Helper to update text, custom fonts, sizes, and colors
+            const applyTypography = (elementId, fieldName, defaultFont, specialColor = null, applyToInnerSpan = false) => {
+                const el = document.getElementById(elementId);
+                const contentText = state.content[fieldName];
+                
+                // Set text (using textContent/innerText prevents HTML injection, but we need formatting for newlines.
+                // Textarea already handles \n, we ensure they render by using whitespace-pre-line in Tailwind classes).
+                if (!contentText && contentText !== "") return;
+                
+                const customFont = state.fieldStyles[fieldName]?.font && state.fieldStyles[fieldName]?.font !== 'default' 
+                    ? state.fieldStyles[fieldName].font 
+                    : defaultFont;
+                
+                const customSize = state.fieldStyles[fieldName]?.size || '1em';
+
+                el.style.fontFamily = customFont;
+                if (specialColor) el.style.color = specialColor;
+                
+                // Wrap in a span for resizing relative to the em scale
+                el.innerHTML = `<span style="font-size: ${customSize}">${escapeHTML(contentText)}</span>`;
+                
+                // Handle visibility
+                if (contentText.trim() === '') {
+                    el.style.display = 'none';
+                    if(fieldName === 'registry') document.getElementById('preview-registry-container').style.display = 'none';
+                    if(fieldName === 'date' && state.content.time.trim() === '') document.getElementById('preview-date-time-container').style.display = 'none';
+                } else {
+                    el.style.display = 'block';
+                    if(fieldName === 'registry') {
+                        document.getElementById('preview-registry-container').style.display = 'block';
+                        document.getElementById('preview-registry-container').style.color = currentPalette.text;
+                    }
+                    if(fieldName === 'date') {
+                        document.getElementById('preview-date-time-container').style.display = 'flex';
+                        document.getElementById('preview-date-time-container').style.borderColor = `${currentPalette.primary}40`;
+                    }
+                }
+            };
+
+            // Boho Floral & Safari Jungle special name font logic
+            const specialNameFont = (state.theme === 'Boho Floral' || state.theme === 'Safari Jungle') 
+                ? "'Great Vibes', cursive" 
+                : currentThemeConfig.fontTitle;
+
+            // Apply to all fields
+            applyTypography('preview-hostText', 'hostText', currentThemeConfig.fontBody);
+            applyTypography('preview-title', 'title', currentThemeConfig.fontTitle, currentPalette.primary);
+            applyTypography('preview-subtitle', 'subtitle', currentThemeConfig.fontBody);
+            applyTypography('preview-name', 'name', specialNameFont, currentPalette.secondary);
+            applyTypography('preview-date', 'date', currentThemeConfig.fontBody);
+            applyTypography('preview-time', 'time', currentThemeConfig.fontBody);
+            applyTypography('preview-location', 'location', currentThemeConfig.fontBody);
+            applyTypography('preview-rsvp', 'rsvp', currentThemeConfig.fontBody, currentPalette.primary);
+            applyTypography('preview-registry', 'registry', currentThemeConfig.fontBody);
+        }
+
+        // Basic XSS protection for innerHTML updates
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag])
+            );
+        }
+
+        function attachDownloadListener() {
+            const btn = document.getElementById('download-btn');
+            const iconDefault = document.getElementById('download-icon');
+            const iconLoading = document.getElementById('loading-icon');
+            const text = document.getElementById('download-text');
+            const cardElement = document.getElementById('invitation-card-capture');
+
+            btn.addEventListener('click', async () => {
+                // UI Loading State
+                btn.disabled = true;
+                btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'hover:-translate-y-0.5');
+                btn.classList.add('bg-blue-400', 'cursor-wait');
+                iconDefault.classList.add('hidden');
+                iconLoading.classList.remove('hidden');
+                text.innerText = "Generating Image...";
+
+                try {
+                    const currentPalette = COLOR_PALETTES[state.theme][state.paletteIndex];
+                    const rect = cardElement.getBoundingClientRect();
+
+                    const canvas = await html2canvas(cardElement, {
+                        scale: 3, 
+                        useCORS: true,
+                        backgroundColor: currentPalette.bg,
+                        logging: false,
+                        width: rect.width,
+                        height: rect.height,
+                        // CRITICAL FIX 1: Negates page scroll offset
+                        scrollY: -window.scrollY,
+                        scrollX: -window.scrollX,
+                        onclone: (clonedDoc) => {
+                            // CRITICAL FIX 2: Intercept the clone and force exact pixel dimensions.
+                            // This prevents html2canvas from collapsing heights on aspect-ratio elements.
+                            const clonedCard = clonedDoc.getElementById('invitation-card-capture');
+                            if (clonedCard) {
+                                clonedCard.style.height = `${rect.height}px`;
+                                clonedCard.style.width = `${rect.width}px`;
+                            }
+                        }
+                    });
+
+                    // Download logic
+                    const link = document.createElement('a');
+                    link.download = `${state.theme.replace(/\s+/g, '-')}-${state.occasion.replace(/\s+/g, '-')}-Invitation.png`;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+
+                } catch (error) {
+                    console.error("Download failed:", error);
+                    // Fallback message via custom UI, alert avoided as per rules
+                    const errorMsg = document.createElement('div');
+                    errorMsg.innerText = "Failed to generate image. Please try again.";
+                    errorMsg.className = "fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded shadow-lg z-50 transition-opacity";
+                    document.body.appendChild(errorMsg);
+                    setTimeout(() => {
+                        errorMsg.style.opacity = '0';
+                        setTimeout(() => document.body.removeChild(errorMsg), 500);
+                    }, 3000);
+                } finally {
+                    // Reset UI State
+                    btn.disabled = false;
+                    btn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'hover:-translate-y-0.5');
+                    btn.classList.remove('bg-blue-400', 'cursor-wait');
+                    iconDefault.classList.remove('hidden');
+                    iconLoading.classList.add('hidden');
+                    text.innerText = "Download Design";
+                }
+            });
+        }
+
+        // Start the app!
+        window.addEventListener('DOMContentLoaded', init);
+
+    </script>
+</body>
+</html>
