@@ -172,6 +172,16 @@
         // --- DATA & CONFIGURATION ---
         const OCCASIONS = ["Baby Shower", "Birthday", "Wedding", "Bridal Shower", "Graduation"];
         
+        // --- NEW: OCCASION TO THEME MAPPING ---
+        const OCCASION_THEMES = {
+            "Baby Shower": ["Safari Jungle", "Ocean Under Sea", "Boho Floral", "Woodland Creatures", "Pastel Rainbow", "Little Sunshine"],
+            "Birthday": ["Cosmic Space", "Magical Unicorn", "Superhero Comic", "Dinosaur Park", "Safari Jungle", "Ocean Under Sea"],
+            "Wedding": ["Boho Floral", "Elegant Greenery", "Romantic Rose", "Modern Minimalist", "Vintage Art Deco", "Rustic Winter"],
+            "Bridal Shower": ["Tea Party", "Boho Floral", "Elegant Greenery", "Romantic Rose", "Modern Minimalist", "Vintage Art Deco"],
+            "Graduation": ["Classic Gold", "Modern Minimalist", "Cosmic Space", "Vintage Art Deco", "Elegant Greenery", "Rustic Winter"]
+        };
+        // --------------------------------------
+
         const POPULAR_FONTS = [
             { label: "Theme Default", value: "default" },
             { label: "Playfair (Serif)", value: "'Playfair Display', serif" },
@@ -197,25 +207,75 @@
                 { name: "Sunset Savannah", primary: "#d35400", secondary: "#f39c12", text: "#4a3b32", bg: "#fffaf0" },
                 { name: "Neutral Earth", primary: "#7f8c8d", secondary: "#bdc3c7", text: "#2c3e50", bg: "#f4f6f7" }
             ],
+            "Ocean Under Sea": [
+                { name: "Coral Reef", primary: "#ff7f50", secondary: "#20b2aa", text: "#004d40", bg: "#e0f7fa" },
+                { name: "Deep Blue", primary: "#01579b", secondary: "#4fc3f7", text: "#ffffff", bg: "#001f3f" },
+                { name: "Sandy Beach", primary: "#00838f", secondary: "#ffb300", text: "#3e2723", bg: "#fff3e0" }
+            ],
             "Boho Floral": [
                 { name: "Rose Gold", primary: "#b76e79", secondary: "#e0bfb8", text: "#4a4a4a", bg: "#fffafb" },
                 { name: "Dusty Blue", primary: "#6b8e23", secondary: "#a0b2c6", text: "#2c3e50", bg: "#f0f8ff" },
                 { name: "Lavender", primary: "#8e44ad", secondary: "#d2b4de", text: "#342244", bg: "#faf5ff" }
             ],
-            "Modern Minimalist": [
-                { name: "Classic Noir", primary: "#222222", secondary: "#888888", text: "#111111", bg: "#ffffff" },
-                { name: "Navy & Gold", primary: "#2c3e50", secondary: "#d4af37", text: "#1a252f", bg: "#f8f9fa" },
-                { name: "Terracotta", primary: "#e07a5f", secondary: "#f4f1de", text: "#3d405b", bg: "#faf9f6" }
+            "Woodland Creatures": [
+                { name: "Rustic Fox", primary: "#c85a17", secondary: "#4a3b32", text: "#2c1e16", bg: "#fdfbf7" },
+                { name: "Forest Pine", primary: "#2c5e3b", secondary: "#8b5a2b", text: "#1a2a22", bg: "#f4f6f7" },
+                { name: "Autumn Leaves", primary: "#d35400", secondary: "#f39c12", text: "#3e2723", bg: "#fffaf0" }
+            ],
+            "Pastel Rainbow": [
+                { name: "Dreamy Pink", primary: "#ffb6c1", secondary: "#87cefa", text: "#4a4a4a", bg: "#fffafb" },
+                { name: "Soft Lavender", primary: "#dda0dd", secondary: "#fffacd", text: "#342244", bg: "#faf5ff" },
+                { name: "Minty Cloud", primary: "#98ff98", secondary: "#ffdab9", text: "#2c3e50", bg: "#f0f8ff" }
+            ],
+            "Little Sunshine": [
+                { name: "Golden Rays", primary: "#ff8c00", secondary: "#ffd700", text: "#4a3b32", bg: "#fffdf0" },
+                { name: "Bright Morning", primary: "#e67e22", secondary: "#f1c40f", text: "#333", bg: "#ffffff" },
+                { name: "Lemonade", primary: "#f39c12", secondary: "#87ceeb", text: "#2c3e50", bg: "#f9fbef" }
             ],
             "Cosmic Space": [
                 { name: "Deep Navy", primary: "#1a2a6c", secondary: "#b21f1f", text: "#ffffff", bg: "#0f172a" },
                 { name: "Purple Nebula", primary: "#4b1248", secondary: "#f0c27b", text: "#fdfdfd", bg: "#1e1b4b" },
                 { name: "Starlight Blue", primary: "#00c6ff", secondary: "#0072ff", text: "#f0f8ff", bg: "#000b18" }
             ],
-            "Ocean Under Sea": [
-                { name: "Coral Reef", primary: "#ff7f50", secondary: "#20b2aa", text: "#004d40", bg: "#e0f7fa" },
-                { name: "Deep Blue", primary: "#01579b", secondary: "#4fc3f7", text: "#ffffff", bg: "#001f3f" },
-                { name: "Sandy Beach", primary: "#00838f", secondary: "#ffb300", text: "#3e2723", bg: "#fff3e0" }
+            "Magical Unicorn": [
+                { name: "Fairy Dust", primary: "#ff69b4", secondary: "#9370db", text: "#4a4a4a", bg: "#fff5fa" },
+                { name: "Purple Magic", primary: "#8a2be2", secondary: "#ffb6c1", text: "#342244", bg: "#f8f5ff" },
+                { name: "Mint Sparkle", primary: "#00fa9a", secondary: "#dda0dd", text: "#2c3e50", bg: "#f0fff4" }
+            ],
+            "Superhero Comic": [
+                { name: "Action Blue", primary: "#2980b9", secondary: "#c0392b", text: "#111111", bg: "#fdfdfd" },
+                { name: "Zap Yellow", primary: "#f1c40f", secondary: "#2c3e50", text: "#222222", bg: "#fffaf0" },
+                { name: "Pow Green", primary: "#27ae60", secondary: "#8e44ad", text: "#111111", bg: "#f4f6f7" }
+            ],
+            "Dinosaur Park": [
+                { name: "T-Rex Green", primary: "#228b22", secondary: "#8b4513", text: "#1a2a22", bg: "#f4f6f0" },
+                { name: "Volcano Red", primary: "#cb4335", secondary: "#f39c12", text: "#3e2723", bg: "#fff9f5" },
+                { name: "Jurassic Blue", primary: "#2e86c1", secondary: "#28b463", text: "#111111", bg: "#f0f8ff" }
+            ],
+            "Elegant Greenery": [
+                { name: "Sage & White", primary: "#7cb342", secondary: "#d4af37", text: "#2c3e50", bg: "#ffffff" },
+                { name: "Emerald & Gold", primary: "#0b5345", secondary: "#f1c40f", text: "#1a252f", bg: "#f9fcfb" },
+                { name: "Olive & Cream", primary: "#556b2f", secondary: "#8b4513", text: "#333333", bg: "#fdfbf7" }
+            ],
+            "Romantic Rose": [
+                { name: "Crimson Red", primary: "#8b0000", secondary: "#ffb6c1", text: "#3e2723", bg: "#fff5f5" },
+                { name: "Blush & Gold", primary: "#d8bfd8", secondary: "#d4af37", text: "#4a4a4a", bg: "#fffdfa" },
+                { name: "Deep Burgundy", primary: "#641e16", secondary: "#f5b041", text: "#1a1110", bg: "#fdf8f5" }
+            ],
+            "Tea Party": [
+                { name: "Earl Grey Blue", primary: "#5dade2", secondary: "#f5b7b1", text: "#2c3e50", bg: "#f4f9f9" },
+                { name: "Rose Tea Pink", primary: "#f1948a", secondary: "#82e0aa", text: "#4a4a4a", bg: "#fff5f6" },
+                { name: "Lavender Scone", primary: "#bb8fce", secondary: "#f9e79f", text: "#342244", bg: "#fbf5ff" }
+            ],
+            "Classic Gold": [
+                { name: "Onyx & Gold", primary: "#111111", secondary: "#d4af37", text: "#111111", bg: "#fdfdfd" },
+                { name: "Navy & Gold", primary: "#1a252f", secondary: "#f1c40f", text: "#1a252f", bg: "#f4f6f9" },
+                { name: "Pure Gold", primary: "#b7950b", secondary: "#222222", text: "#333333", bg: "#fffcf5" }
+            ],
+            "Modern Minimalist": [
+                { name: "Classic Noir", primary: "#222222", secondary: "#888888", text: "#111111", bg: "#ffffff" },
+                { name: "Navy & Gold", primary: "#2c3e50", secondary: "#d4af37", text: "#1a252f", bg: "#f8f9fa" },
+                { name: "Terracotta", primary: "#e07a5f", secondary: "#f4f1de", text: "#3d405b", bg: "#faf9f6" }
             ],
             "Rustic Winter": [
                 { name: "Frosty Pine", primary: "#2e4a3d", secondary: "#8ba8a0", text: "#1a2a22", bg: "#f0f5f3" },
@@ -271,42 +331,139 @@
                     <div class="absolute inset-4 border rounded-lg opacity-30" style="border-color:${c.primary}"></div>
                 `
             },
+            "Woodland Creatures": {
+                fontTitle: "'Great Vibes', cursive", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-0 right-4 text-6xl opacity-90 transform rotate-12 translate-y-4 z-0">🦊</div>
+                    <div class="absolute top-4 left-4 text-6xl opacity-90 transform -rotate-12 translate-y-4 z-0">🦉</div>
+                    <div class="absolute bottom-6 left-4 text-7xl opacity-90 transform -rotate-6 z-0">🐻</div>
+                    <div class="absolute bottom-6 right-4 text-6xl opacity-90 transform rotate-6 z-0">🦌</div>
+                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-5xl opacity-80 z-0">🍄</div>
+                `
+            },
+            "Pastel Rainbow": {
+                fontTitle: "'Pacifico', cursive", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute inset-0 opacity-20 z-0" style="background: linear-gradient(135deg, ${c.primary}, ${c.secondary});"></div>
+                    <div class="absolute top-6 left-1/2 -translate-x-1/2 text-8xl opacity-80 z-0">🌈</div>
+                    <div class="absolute top-16 left-6 text-6xl opacity-70 z-0">☁️</div>
+                    <div class="absolute top-20 right-6 text-6xl opacity-70 z-0">☁️</div>
+                    <div class="absolute bottom-10 left-10 text-4xl opacity-60 z-0 animate-pulse">✨</div>
+                    <div class="absolute bottom-20 right-12 text-5xl opacity-60 z-0">✨</div>
+                `
+            },
+            "Little Sunshine": {
+                fontTitle: "'Dancing Script', cursive", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-0 right-0 w-40 h-40 bg-yellow-300 rounded-bl-full opacity-30 z-0"></div>
+                    <div class="absolute top-2 right-2 text-8xl opacity-90 animate-pulse z-0">☀️</div>
+                    <div class="absolute bottom-0 left-0 text-7xl transform -scale-x-100 translate-y-4 translate-x-2 z-0">🌻</div>
+                    <div class="absolute bottom-0 right-0 text-7xl translate-y-4 -translate-x-2 z-0">🌻</div>
+                `
+            },
+            "Magical Unicorn": {
+                fontTitle: "'Pacifico', cursive", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-4 left-4 text-5xl opacity-80 z-0">🎀</div>
+                    <div class="absolute top-6 right-8 text-4xl opacity-70 animate-pulse z-0">✨</div>
+                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-8xl drop-shadow-lg z-0">🦄</div>
+                    <div class="absolute bottom-10 left-6 text-4xl opacity-60 z-0">💖</div>
+                    <div class="absolute bottom-12 right-6 text-5xl opacity-60 z-0">⭐</div>
+                `
+            },
+            "Superhero Comic": {
+                fontTitle: "'Montserrat', sans-serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute inset-0 opacity-10 z-0" style="background-image: radial-gradient(${c.primary} 3px, transparent 3px); background-size: 15px 15px;"></div>
+                    <div class="absolute top-4 left-4 text-7xl transform -rotate-12 drop-shadow-md z-0">💥</div>
+                    <div class="absolute bottom-10 right-4 text-7xl transform rotate-12 drop-shadow-md z-0">⚡</div>
+                    <div class="absolute bottom-6 left-6 text-7xl z-0">🦸‍♂️</div>
+                `
+            },
+            "Dinosaur Park": {
+                fontTitle: "'Montserrat', sans-serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-0 left-0 text-7xl transform -scale-x-100 rotate-12 -translate-y-2 z-0">🌿</div>
+                    <div class="absolute top-0 right-0 text-7xl rotate-12 -translate-y-2 z-0">🌿</div>
+                    <div class="absolute bottom-6 left-4 text-7xl transform -scale-x-100 drop-shadow-sm z-0">🦕</div>
+                    <div class="absolute bottom-6 right-4 text-7xl drop-shadow-sm z-0">🦖</div>
+                    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-6xl z-0">🌋</div>
+                `
+            },
+            "Elegant Greenery": {
+                fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-0 left-0 text-8xl opacity-80 transform -rotate-45 -translate-x-4 -translate-y-4 z-0">🌿</div>
+                    <div class="absolute bottom-0 right-0 text-8xl opacity-80 transform rotate-135 translate-x-4 translate-y-4 z-0">🌿</div>
+                    <div class="absolute inset-6 border border-opacity-40 z-0 pointer-events-none" style="border-color:${c.primary}"></div>
+                `
+            },
+            "Romantic Rose": {
+                fontTitle: "'Great Vibes', cursive", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-0 left-0 text-7xl opacity-90 transform -rotate-12 z-0">🌹</div>
+                    <div class="absolute bottom-0 right-0 text-7xl opacity-90 transform rotate-12 z-0">🌹</div>
+                    <div class="absolute top-8 right-8 text-4xl opacity-60 z-0">🥀</div>
+                    <div class="absolute bottom-8 left-8 text-4xl opacity-60 z-0">🥀</div>
+                    <div class="absolute inset-4 border-2 border-dashed opacity-30 z-0 pointer-events-none" style="border-color:${c.primary}"></div>
+                `
+            },
+            "Tea Party": {
+                fontTitle: "'Dancing Script', cursive", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-6 left-6 text-6xl transform -rotate-12 drop-shadow-sm z-0">🫖</div>
+                    <div class="absolute top-8 right-8 text-5xl transform rotate-12 drop-shadow-sm z-0">🧁</div>
+                    <div class="absolute bottom-6 left-8 text-6xl z-0">🌸</div>
+                    <div class="absolute bottom-6 right-8 text-6xl transform -scale-x-100 z-0">🌸</div>
+                    <div class="absolute inset-0 opacity-[0.03] z-0 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, ${c.primary} 0, ${c.primary} 2px, transparent 2px, transparent 10px);"></div>
+                `
+            },
+            "Classic Gold": {
+                fontTitle: "'Cinzel', serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-6 left-1/2 -translate-x-1/2 text-7xl drop-shadow-md z-0">🎓</div>
+                    <div class="absolute bottom-8 left-10 text-6xl transform -rotate-12 z-0">🥂</div>
+                    <div class="absolute bottom-10 right-10 text-5xl transform rotate-12 z-0">⭐</div>
+                    <div class="absolute inset-4 border-4 opacity-90 z-0 pointer-events-none" style="border-color:${c.secondary}"></div>
+                    <div class="absolute inset-5 border border-opacity-50 z-0 pointer-events-none" style="border-color:${c.secondary}"></div>
+                `
+            },
             "Modern Minimalist": {
                 fontTitle: "'Montserrat', sans-serif", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
-                    <div class="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-20" style="background-color:${c.primary}"></div>
-                    <div class="absolute bottom-0 left-0 w-48 h-48 rounded-tr-full opacity-20" style="background-color:${c.secondary}"></div>
-                    <div class="absolute top-1/2 left-4 w-1 h-32 transform -translate-y-1/2 opacity-30" style="background-color:${c.primary}"></div>
+                    <div class="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-20 z-0" style="background-color:${c.primary}"></div>
+                    <div class="absolute bottom-0 left-0 w-48 h-48 rounded-tr-full opacity-20 z-0" style="background-color:${c.secondary}"></div>
+                    <div class="absolute top-1/2 left-4 w-1 h-32 transform -translate-y-1/2 opacity-30 z-0" style="background-color:${c.primary}"></div>
                 `
             },
             "Cosmic Space": {
                 fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
-                    <div class="absolute inset-0 opacity-10" style="background-color:${c.secondary}"></div>
-                    <div class="absolute top-8 left-8 text-4xl opacity-80 animate-pulse">✨</div>
-                    <div class="absolute bottom-24 left-10 text-2xl opacity-70">🌟</div>
-                    <div class="absolute top-32 left-4 text-6xl opacity-90 transform -rotate-12">🌙</div>
-                    <div class="absolute bottom-12 right-8 text-7xl opacity-90 transform rotate-12">🚀</div>
+                    <div class="absolute inset-0 opacity-10 z-0" style="background-color:${c.secondary}"></div>
+                    <div class="absolute top-8 left-8 text-4xl opacity-80 animate-pulse z-0">✨</div>
+                    <div class="absolute bottom-24 left-10 text-2xl opacity-70 z-0">🌟</div>
+                    <div class="absolute top-32 left-4 text-6xl opacity-90 transform -rotate-12 z-0">🌙</div>
+                    <div class="absolute bottom-12 right-8 text-7xl opacity-90 transform rotate-12 z-0">🚀</div>
                 `
             },
             "Rustic Winter": {
                 fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
-                    <div class="absolute inset-5 border-2 border-opacity-40" style="border-color:${c.primary}"></div>
-                    <div class="absolute top-8 left-8 text-4xl opacity-60">❄️</div>
-                    <div class="absolute bottom-1/4 right-6 text-4xl opacity-40">❄️</div>
-                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 text-6xl opacity-80">🦌</div>
-                    <div class="absolute bottom-8 left-4 text-6xl opacity-70">🌲</div>
-                    <div class="absolute bottom-8 right-4 text-5xl opacity-70">🌲</div>
+                    <div class="absolute inset-5 border-2 border-opacity-40 z-0" style="border-color:${c.primary}"></div>
+                    <div class="absolute top-8 left-8 text-4xl opacity-60 z-0">❄️</div>
+                    <div class="absolute bottom-1/4 right-6 text-4xl opacity-40 z-0">❄️</div>
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 text-6xl opacity-80 z-0">🦌</div>
+                    <div class="absolute bottom-8 left-4 text-6xl opacity-70 z-0">🌲</div>
+                    <div class="absolute bottom-8 right-4 text-5xl opacity-70 z-0">🌲</div>
                 `
             },
             "Vintage Art Deco": {
                 fontTitle: "'Cinzel', serif", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
-                    <div class="absolute inset-4 border-2 opacity-80" style="border-color:${c.secondary}"></div>
-                    <div class="absolute top-4 left-4 w-12 h-12 border-t-4 border-l-4 opacity-80" style="border-color:${c.secondary}"></div>
-                    <div class="absolute bottom-4 right-4 w-12 h-12 border-b-4 border-r-4 opacity-80" style="border-color:${c.secondary}"></div>
-                    <div class="absolute inset-0 opacity-[0.02]" style="background-image: repeating-linear-gradient(45deg, ${c.secondary} 0, ${c.secondary} 1px, transparent 0, transparent 50%); background-size: 10px 10px;"></div>
+                    <div class="absolute inset-4 border-2 opacity-80 z-0" style="border-color:${c.secondary}"></div>
+                    <div class="absolute top-4 left-4 w-12 h-12 border-t-4 border-l-4 opacity-80 z-0" style="border-color:${c.secondary}"></div>
+                    <div class="absolute bottom-4 right-4 w-12 h-12 border-b-4 border-r-4 opacity-80 z-0" style="border-color:${c.secondary}"></div>
+                    <div class="absolute inset-0 opacity-[0.02] z-0" style="background-image: repeating-linear-gradient(45deg, ${c.secondary} 0, ${c.secondary} 1px, transparent 0, transparent 50%); background-size: 10px 10px;"></div>
                 `
             }
         };
@@ -326,7 +483,7 @@
         // --- GLOBAL APP STATE ---
         let state = {
             occasion: "Baby Shower",
-            theme: "Safari Jungle",
+            theme: "Safari Jungle", // This will be dynamically updated
             paletteIndex: 0,
             isLocked: false,
             content: {
@@ -513,6 +670,10 @@
                 state.occasion = urlOccasion;
                 state.isLocked = true;
                 state.content.title = urlOccasion;
+                // Ensure the current theme is valid for the locked occasion
+                if (!OCCASION_THEMES[urlOccasion].includes(state.theme)) {
+                    state.theme = OCCASION_THEMES[urlOccasion][0];
+                }
                 
                 document.getElementById('occasion-container').innerHTML = `
                     <div class="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 flex items-center justify-between cursor-not-allowed">
@@ -527,16 +688,28 @@
                 select.onchange = (e) => {
                     state.occasion = e.target.value;
                     state.content.title = e.target.value;
+                    
+                    // Smart Theme Switcher: If the old theme isn't allowed for the new occasion, pick the first allowed one
+                    const allowedThemes = OCCASION_THEMES[state.occasion];
+                    if (!allowedThemes.includes(state.theme)) {
+                        state.theme = allowedThemes[0];
+                        state.paletteIndex = 0;
+                    }
+
+                    initUI(); // Re-render the whole UI to show new buttons
                     buildTextInputs(); // Rebuild to show new title
                     renderPreview();
                 };
             }
 
-            // Theme Buttons
+            // Theme Buttons (Now Filtered!)
             const themeContainer = document.getElementById('theme-buttons');
-            themeContainer.innerHTML = ''; // FIX: Clear existing buttons before adding to prevent duplicates
+            themeContainer.innerHTML = ''; 
             
-            Object.keys(THEMES).forEach(t => {
+            // Only loop through themes allowed for the CURRENT occasion
+            const availableThemes = OCCASION_THEMES[state.occasion];
+            
+            availableThemes.forEach(t => {
                 const btn = document.createElement('button');
                 btn.innerText = t;
                 btn.className = `py-2 px-3 text-sm rounded-lg border text-center transition-all ${state.theme === t ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold' : 'bg-white text-gray-600 hover:bg-gray-50'}`;
