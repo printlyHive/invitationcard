@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PrintlyHive Design Studio for Customers</title>
+    <title>PrintlyHive Design Studio</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Pacifico&family=Dancing+Script:wght@700&family=Great+Vibes&family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
-        .pattern-grid {
+        .pattern-grid-bg {
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
             background-size: 24px 24px;
         }
@@ -23,21 +26,21 @@
         .draggable-graphic { cursor: grab; position: absolute; transform-origin: center; user-select: none; }
         .draggable-graphic:active { cursor: grabbing; }
         .draggable-graphic img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        .draggable-graphic canvas { width: 100%; height: 100%; pointer-events: none; } /* For QR Codes */
     </style>
 </head>
 <body class="bg-gray-100 font-sans text-gray-800 flex flex-col md:flex-row h-[100dvh] overflow-hidden">
 
-    <!-- LEFT PANEL: Editor (Bottom on Mobile, Left on PC) -->
-    <div class="w-full md:w-[400px] bg-white border-r border-gray-200 shadow-xl overflow-y-auto z-20 flex flex-col h-[55dvh] md:h-screen order-2 md:order-1">
+    <!-- LEFT PANEL: Editor -->
+    <div class="w-full md:w-[420px] bg-white border-r border-gray-200 shadow-xl overflow-y-auto z-20 flex flex-col h-[55dvh] md:h-screen order-2 md:order-1">
         
         <div class="p-5 md:p-6 bg-slate-900 text-white flex-shrink-0">
-            <h1 class="text-xl md:text-2xl font-bold flex items-center gap-2">✨ PrintlyHive Design Studio</h1>
+            <h1 class="text-xl md:text-2xl font-bold flex items-center gap-2">✨ PrintlyHive Studio</h1>
             <p class="text-xs md:text-sm text-slate-300 mt-1">Etsy Digital Download Creator</p>
         </div>
 
         <div class="flex-1 p-5 md:p-6 space-y-8 overflow-y-auto" id="editor-forms">
             
-            <!-- Design Settings -->
             <section class="space-y-4">
                 <h2 class="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-2">1. Design Settings</h2>
                 
@@ -54,12 +57,16 @@
                 </div>
 
                 <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Background Pattern</label>
+                    <select id="input-pattern" class="w-full p-2.5 text-base bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></select>
+                </div>
+
+                <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Color Palette</label>
-                    <div id="palette-buttons" class="flex flex-wrap gap-3"></div>
+                    <div id="palette-buttons" class="flex flex-wrap gap-2"></div>
                 </div>
             </section>
 
-            <!-- Text Content -->
             <section class="space-y-4">
                 <h2 class="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-2">2. Card Details</h2>
                 <div id="text-inputs-container" class="space-y-4">
@@ -67,9 +74,8 @@
                 </div>
             </section>
 
-            <!-- Custom Graphics Engine -->
             <section class="space-y-4">
-                <h2 class="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-2">3. Custom Graphics</h2>
+                <h2 class="text-xs md:text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-2">3. Custom Graphics & RSVP</h2>
                 
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
                     <p class="text-xs text-gray-500 mb-3">Add photos or emojis. Drag them on the card to move!</p>
@@ -81,13 +87,24 @@
                         </label>
                     </div>
 
-                    <div class="grid grid-cols-6 gap-2 mb-4 text-2xl text-center cursor-pointer select-none" id="emoji-picker">
+                    <div class="grid grid-cols-6 gap-2 mb-4 text-2xl text-center cursor-pointer select-none">
                         <div class="hover:scale-125 transition-transform" onclick="addGraphic('emoji', '🎂')">🎂</div>
                         <div class="hover:scale-125 transition-transform" onclick="addGraphic('emoji', '🎈')">🎈</div>
                         <div class="hover:scale-125 transition-transform" onclick="addGraphic('emoji', '👶')">👶</div>
-                        <div class="hover:scale-125 transition-transform" onclick="addGraphic('emoji', '🧸')">🧸</div>
-                        <div class="hover:scale-125 transition-transform" onclick="addGraphic('emoji', '💍')">💍</div>
+                        <div class="hover:scale-125 transition-transform" onclick="addGraphic('emoji', '🏎️')">🏎️</div>
+                        <div class="hover:scale-125 transition-transform" onclick="addGraphic('emoji', '🏈')">🏈</div>
                         <div class="hover:scale-125 transition-transform" onclick="addGraphic('emoji', '🥂')">🥂</div>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <p class="text-xs font-bold text-gray-700 mb-1">Generate RSVP QR Code</p>
+                        <p class="text-[10px] text-gray-500 mb-2">Paste your Google Form or TheKnot link here:</p>
+                        <div class="flex gap-2">
+                            <input type="text" id="qr-input" placeholder="https://..." class="flex-1 p-2 text-sm bg-white border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                            <button onclick="generateQRCode()" class="bg-slate-800 text-white px-3 py-2 rounded text-sm font-bold hover:bg-slate-700">Add QR</button>
+                        </div>
+                        <!-- Hidden div for QR generation -->
+                        <div id="qr-temp" class="hidden"></div>
                     </div>
 
                     <div id="active-graphics-list" class="space-y-2 mt-4 empty:hidden">
@@ -104,20 +121,20 @@
                 <svg id="icon-loading" class="animate-spin hidden h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                 <span id="download-text">Download Design</span>
             </button>
-            <p class="text-center text-xs text-gray-500 mt-2">Downloads a high-res PNG file</p>
+            <p class="text-center text-[10px] text-gray-500 mt-2">Downloads a high-res print-ready PNG file</p>
         </div>
     </div>
 
-    <!-- RIGHT PANEL: Live Preview Area (Top on Mobile, Right on PC) -->
-    <div id="preview-area" class="flex-1 overflow-hidden flex items-center justify-center relative bg-[#f0f2f5] p-0 md:p-12 pattern-grid h-[45dvh] md:h-screen order-1 md:order-2">
+    <!-- RIGHT PANEL: Live Preview Area -->
+    <div id="preview-area" class="flex-1 overflow-hidden flex items-center justify-center relative bg-[#f0f2f5] p-0 md:p-12 pattern-grid-bg h-[45dvh] md:h-screen order-1 md:order-2">
         
         <!-- Helper Tooltip -->
         <div class="absolute top-2 md:top-6 bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-full shadow-sm border border-gray-200 text-xs md:text-sm text-gray-500 flex items-center gap-2 z-10">
             <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            Live Preview
+            Live Preview (5x7)
         </div>
 
-        <!-- Transform Scale Wrapper for perfect fitting -->
+        <!-- Transform Scale Wrapper -->
         <div id="scale-wrapper" class="transition-transform duration-200 origin-center flex items-center justify-center">
             
             <!-- Card Wrapper (Fixed at 500x700 pixels mathematically) -->
@@ -126,40 +143,43 @@
                 <!-- Actual Card Content -->
                 <div id="invitation-card-capture" class="relative w-full h-full overflow-hidden flex flex-col items-center text-center transition-colors duration-500 bg-white">
                     
-                    <!-- Background Decorations -->
-                    <div id="preview-decorations" class="absolute inset-0 pointer-events-none z-0"></div>
+                    <!-- SVG Background Pattern Layer -->
+                    <div id="preview-pattern-layer" class="absolute inset-0 opacity-10 pointer-events-none z-0"></div>
                     
-                    <!-- Interactive Graphics Container -->
-                    <div id="canvas-elements" class="absolute inset-0 z-10 pointer-events-auto overflow-hidden"></div>
+                    <!-- Background Theme Decorations -->
+                    <div id="preview-decorations" class="absolute inset-0 pointer-events-none z-10"></div>
+                    
+                    <!-- Interactive Graphics Container (Draggables) -->
+                    <div id="canvas-elements" class="absolute inset-0 z-20 pointer-events-auto overflow-hidden"></div>
 
-                    <!-- Typography Content Wrapper (Flex-Grow Spring Layout) -->
-                    <div class="relative z-20 flex flex-col items-center justify-between h-full w-full py-8 pointer-events-none">
+                    <!-- Typography Content Wrapper (Spring Layout) -->
+                    <div class="relative z-30 flex flex-col items-center justify-between h-full w-full py-8 pointer-events-none">
                         
-                        <!-- Header Section -->
+                        <!-- Header Section (Shifted down) -->
                         <div class="flex flex-col items-center gap-2 mt-10">
                             <p id="preview-hostText" class="text-sm tracking-widest uppercase opacity-80"></p>
                             <h2 id="preview-title" class="text-5xl my-0 leading-tight px-4"></h2>
                             <p id="preview-subtitle" class="text-sm tracking-[0.2em] uppercase opacity-70 mt-4"></p>
                         </div>
 
-                        <!-- Main Subject Section (Spring) -->
+                        <!-- Main Subject Section -->
                         <div class="flex-grow flex items-center justify-center w-full relative">
-                            <h1 id="preview-name" class="text-6xl font-bold leading-tight px-6 drop-shadow-sm mb-8"></h1>
+                            <h1 id="preview-name" class="text-6xl font-bold leading-tight px-6 drop-shadow-sm mb-12"></h1>
                         </div>
 
-                        <!-- Event Details Section -->
-                        <div class="flex flex-col items-center justify-end w-full px-8 pb-16 relative">
+                        <!-- Event Details Section (Heavily padded to prevent overlap!) -->
+                        <div class="flex flex-col items-center justify-end w-full px-8 pb-36 relative">
                             <div class="flex flex-col items-center gap-1 w-full border-t border-b py-3 mb-4" id="preview-date-divider">
                                 <p id="preview-date" class="font-semibold text-lg tracking-wide uppercase"></p>
                                 <p id="preview-time" class="text-base opacity-80"></p>
                             </div>
 
                             <div id="preview-location" class="whitespace-pre-line text-base opacity-90 leading-relaxed font-medium"></div>
-                            <div id="preview-rsvp" class="whitespace-pre-line text-sm mt-2 opacity-90 font-bold"></div>
+                            <div id="preview-rsvp" class="whitespace-pre-line text-sm mt-3 opacity-90 font-bold"></div>
                             
                             <!-- Registry Pill -->
                             <div id="preview-registry-container" class="mt-4 bg-white/80 px-5 py-2 rounded-full shadow-sm mb-6 inline-block">
-                                <div id="preview-registry" class="text-xs tracking-widest uppercase opacity-90 font-bold"></div>
+                                <div id="preview-registry" class="text-[11px] tracking-widest uppercase opacity-90 font-bold"></div>
                             </div>
                         </div>
                     </div>
@@ -169,18 +189,17 @@
     </div>
 
     <script>
-        // --- DATA & CONFIGURATION ---
+        // --- STREAMING_CHUNK:Configuration & Data ---
         const OCCASIONS = ["Baby Shower", "Birthday", "Wedding", "Bridal Shower", "Graduation"];
         
-        // --- NEW: OCCASION TO THEME MAPPING ---
+        // Smart Theme Filter (Expanded to 10 curated themes per occasion)
         const OCCASION_THEMES = {
-            "Baby Shower": ["Safari Jungle", "Ocean Under Sea", "Boho Floral", "Woodland Creatures", "Pastel Rainbow", "Little Sunshine"],
-            "Birthday": ["Cosmic Space", "Magical Unicorn", "Superhero Comic", "Dinosaur Park", "Safari Jungle", "Ocean Under Sea"],
-            "Wedding": ["Boho Floral", "Elegant Greenery", "Romantic Rose", "Modern Minimalist", "Vintage Art Deco", "Rustic Winter"],
-            "Bridal Shower": ["Tea Party", "Boho Floral", "Elegant Greenery", "Romantic Rose", "Modern Minimalist", "Vintage Art Deco"],
-            "Graduation": ["Classic Gold", "Modern Minimalist", "Cosmic Space", "Vintage Art Deco", "Elegant Greenery", "Rustic Winter"]
+            "Baby Shower": ["Safari Jungle", "Ocean Under Sea", "Woodland Creatures", "Pastel Rainbow", "Little Sunshine", "Toon Town", "Magical Unicorn", "Elegant Greenery", "Boho Floral", "Dinosaur Park"],
+            "Birthday": ["Magical Unicorn", "Superhero Comic", "Dinosaur Park", "All-Star Sports", "Racing Cars", "Cosmic Space", "Toon Town", "Safari Jungle", "Ocean Under Sea", "Classic Gold"],
+            "Wedding": ["Boho Floral", "Modern Minimalist", "Vintage Art Deco", "Elegant Greenery", "Romantic Rose", "Tea Party", "Classic Gold", "Cosmic Space", "Pastel Rainbow", "Midnight Glamour"],
+            "Bridal Shower": ["Boho Floral", "Elegant Greenery", "Romantic Rose", "Tea Party", "Modern Minimalist", "Pastel Rainbow", "Vintage Art Deco", "Classic Gold", "Magical Unicorn", "Little Sunshine"],
+            "Graduation": ["Classic Gold", "Modern Minimalist", "Vintage Art Deco", "Cosmic Space", "Boho Floral", "All-Star Sports", "Racing Cars", "Midnight Glamour", "Superhero Comic", "Ocean Under Sea"]
         };
-        // --------------------------------------
 
         const POPULAR_FONTS = [
             { label: "Theme Default", value: "default" },
@@ -198,275 +217,253 @@
             { label: "Normal", value: "1em" },
             { label: "Large", value: "1.2em" },
             { label: "X-Large", value: "1.4em" },
-            { label: "Huge", value: "1.6em" }
+            { label: "Huge", value: "1.6em" },
+            { label: "Massive", value: "2em" }
         ];
 
-        const COLOR_PALETTES = {
-            "Safari Jungle": [
-                { name: "Jungle Green", primary: "#2c5e3b", secondary: "#e8c972", text: "#333333", bg: "#fdfbf7" },
-                { name: "Sunset Savannah", primary: "#d35400", secondary: "#f39c12", text: "#4a3b32", bg: "#fffaf0" },
-                { name: "Neutral Earth", primary: "#7f8c8d", secondary: "#bdc3c7", text: "#2c3e50", bg: "#f4f6f7" }
-            ],
-            "Ocean Under Sea": [
-                { name: "Coral Reef", primary: "#ff7f50", secondary: "#20b2aa", text: "#004d40", bg: "#e0f7fa" },
-                { name: "Deep Blue", primary: "#01579b", secondary: "#4fc3f7", text: "#ffffff", bg: "#001f3f" },
-                { name: "Sandy Beach", primary: "#00838f", secondary: "#ffb300", text: "#3e2723", bg: "#fff3e0" }
-            ],
-            "Boho Floral": [
-                { name: "Rose Gold", primary: "#b76e79", secondary: "#e0bfb8", text: "#4a4a4a", bg: "#fffafb" },
-                { name: "Dusty Blue", primary: "#6b8e23", secondary: "#a0b2c6", text: "#2c3e50", bg: "#f0f8ff" },
-                { name: "Lavender", primary: "#8e44ad", secondary: "#d2b4de", text: "#342244", bg: "#faf5ff" }
-            ],
-            "Woodland Creatures": [
-                { name: "Rustic Fox", primary: "#c85a17", secondary: "#4a3b32", text: "#2c1e16", bg: "#fdfbf7" },
-                { name: "Forest Pine", primary: "#2c5e3b", secondary: "#8b5a2b", text: "#1a2a22", bg: "#f4f6f7" },
-                { name: "Autumn Leaves", primary: "#d35400", secondary: "#f39c12", text: "#3e2723", bg: "#fffaf0" }
-            ],
-            "Pastel Rainbow": [
-                { name: "Dreamy Pink", primary: "#ffb6c1", secondary: "#87cefa", text: "#4a4a4a", bg: "#fffafb" },
-                { name: "Soft Lavender", primary: "#dda0dd", secondary: "#fffacd", text: "#342244", bg: "#faf5ff" },
-                { name: "Minty Cloud", primary: "#98ff98", secondary: "#ffdab9", text: "#2c3e50", bg: "#f0f8ff" }
-            ],
-            "Little Sunshine": [
-                { name: "Golden Rays", primary: "#ff8c00", secondary: "#ffd700", text: "#4a3b32", bg: "#fffdf0" },
-                { name: "Bright Morning", primary: "#e67e22", secondary: "#f1c40f", text: "#333", bg: "#ffffff" },
-                { name: "Lemonade", primary: "#f39c12", secondary: "#87ceeb", text: "#2c3e50", bg: "#f9fbef" }
-            ],
-            "Cosmic Space": [
-                { name: "Deep Navy", primary: "#1a2a6c", secondary: "#b21f1f", text: "#ffffff", bg: "#0f172a" },
-                { name: "Purple Nebula", primary: "#4b1248", secondary: "#f0c27b", text: "#fdfdfd", bg: "#1e1b4b" },
-                { name: "Starlight Blue", primary: "#00c6ff", secondary: "#0072ff", text: "#f0f8ff", bg: "#000b18" }
-            ],
-            "Magical Unicorn": [
-                { name: "Fairy Dust", primary: "#ff69b4", secondary: "#9370db", text: "#4a4a4a", bg: "#fff5fa" },
-                { name: "Purple Magic", primary: "#8a2be2", secondary: "#ffb6c1", text: "#342244", bg: "#f8f5ff" },
-                { name: "Mint Sparkle", primary: "#00fa9a", secondary: "#dda0dd", text: "#2c3e50", bg: "#f0fff4" }
-            ],
-            "Superhero Comic": [
-                { name: "Action Blue", primary: "#2980b9", secondary: "#c0392b", text: "#111111", bg: "#fdfdfd" },
-                { name: "Zap Yellow", primary: "#f1c40f", secondary: "#2c3e50", text: "#222222", bg: "#fffaf0" },
-                { name: "Pow Green", primary: "#27ae60", secondary: "#8e44ad", text: "#111111", bg: "#f4f6f7" }
-            ],
-            "Dinosaur Park": [
-                { name: "T-Rex Green", primary: "#228b22", secondary: "#8b4513", text: "#1a2a22", bg: "#f4f6f0" },
-                { name: "Volcano Red", primary: "#cb4335", secondary: "#f39c12", text: "#3e2723", bg: "#fff9f5" },
-                { name: "Jurassic Blue", primary: "#2e86c1", secondary: "#28b463", text: "#111111", bg: "#f0f8ff" }
-            ],
-            "Elegant Greenery": [
-                { name: "Sage & White", primary: "#7cb342", secondary: "#d4af37", text: "#2c3e50", bg: "#ffffff" },
-                { name: "Emerald & Gold", primary: "#0b5345", secondary: "#f1c40f", text: "#1a252f", bg: "#f9fcfb" },
-                { name: "Olive & Cream", primary: "#556b2f", secondary: "#8b4513", text: "#333333", bg: "#fdfbf7" }
-            ],
-            "Romantic Rose": [
-                { name: "Crimson Red", primary: "#8b0000", secondary: "#ffb6c1", text: "#3e2723", bg: "#fff5f5" },
-                { name: "Blush & Gold", primary: "#d8bfd8", secondary: "#d4af37", text: "#4a4a4a", bg: "#fffdfa" },
-                { name: "Deep Burgundy", primary: "#641e16", secondary: "#f5b041", text: "#1a1110", bg: "#fdf8f5" }
-            ],
-            "Tea Party": [
-                { name: "Earl Grey Blue", primary: "#5dade2", secondary: "#f5b7b1", text: "#2c3e50", bg: "#f4f9f9" },
-                { name: "Rose Tea Pink", primary: "#f1948a", secondary: "#82e0aa", text: "#4a4a4a", bg: "#fff5f6" },
-                { name: "Lavender Scone", primary: "#bb8fce", secondary: "#f9e79f", text: "#342244", bg: "#fbf5ff" }
-            ],
-            "Classic Gold": [
-                { name: "Onyx & Gold", primary: "#111111", secondary: "#d4af37", text: "#111111", bg: "#fdfdfd" },
-                { name: "Navy & Gold", primary: "#1a252f", secondary: "#f1c40f", text: "#1a252f", bg: "#f4f6f9" },
-                { name: "Pure Gold", primary: "#b7950b", secondary: "#222222", text: "#333333", bg: "#fffcf5" }
-            ],
-            "Modern Minimalist": [
-                { name: "Classic Noir", primary: "#222222", secondary: "#888888", text: "#111111", bg: "#ffffff" },
-                { name: "Navy & Gold", primary: "#2c3e50", secondary: "#d4af37", text: "#1a252f", bg: "#f8f9fa" },
-                { name: "Terracotta", primary: "#e07a5f", secondary: "#f4f1de", text: "#3d405b", bg: "#faf9f6" }
-            ],
-            "Rustic Winter": [
-                { name: "Frosty Pine", primary: "#2e4a3d", secondary: "#8ba8a0", text: "#1a2a22", bg: "#f0f5f3" },
-                { name: "Midnight Snow", primary: "#1c2833", secondary: "#85c1e9", text: "#fdfefe", bg: "#154360" },
-                { name: "Berry & Wood", primary: "#641e16", secondary: "#d4ac0d", text: "#3e2723", bg: "#fdf7e3" }
-            ],
-            "Vintage Art Deco": [
-                { name: "Gatsby Gold", primary: "#ffffff", secondary: "#d4af37", text: "#f8f9fa", bg: "#111111" },
-                { name: "Emerald Glitz", primary: "#0e6251", secondary: "#f1c40f", text: "#183028", bg: "#e9f7ef" },
-                { name: "Pearl Deco", primary: "#2c3e50", secondary: "#b7950b", text: "#1a252f", bg: "#fdfbf7" }
-            ]
-        };
+        // 10 Universal Base64 Patterns
+        const PATTERNS = [
+            { name: "None", value: "none" },
+            { name: "Dots", value: `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="2" fill="currentColor"/></svg>` },
+            { name: "Stripes", value: `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><line x1="0" y1="0" x2="0" y2="20" stroke="currentColor" stroke-width="4"/></svg>` },
+            { name: "Grid", value: `<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M40 0L0 0 0 40" fill="none" stroke="currentColor" stroke-width="2"/></svg>` },
+            { name: "Hearts", value: `<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M20 15c-3-5-10-5-10 0 0 6 10 12 10 12s10-6 10-12c0-5-7-5-10 0z" fill="currentColor"/></svg>` },
+            { name: "Stars", value: `<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><path d="M20 5l4 10h11l-9 7 3 11-10-7-9 7 4-11-9-7h11z" fill="currentColor"/></svg>` },
+            { name: "Flowers", value: `<svg width="40" height="40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="4" fill="currentColor"/><circle cx="20" cy="12" r="4" fill="currentColor"/><circle cx="20" cy="28" r="4" fill="currentColor"/><circle cx="12" cy="20" r="4" fill="currentColor"/><circle cx="28" cy="20" r="4" fill="currentColor"/></svg>` },
+            { name: "Waves", value: `<svg width="40" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M0 10 Q 10 0, 20 10 T 40 10" fill="none" stroke="currentColor" stroke-width="2"/></svg>` },
+            { name: "Chevron", value: `<svg width="40" height="20" xmlns="http://www.w3.org/2000/svg"><path d="M0 20 L20 0 L40 20" fill="none" stroke="currentColor" stroke-width="2"/></svg>` },
+            { name: "Checks", value: `<svg width="20" height="20" xmlns="http://www.w3.org/2000/svg"><rect width="10" height="10" fill="currentColor"/><rect x="10" y="10" width="10" height="10" fill="currentColor"/></svg>` }
+        ];
 
-        const THEMES = {
+        // --- STREAMING_CHUNK:Theme & Palette Generation ---
+        const UNIVERSAL_PALETTES = [
+            { name: "Standard", primary: "#2c3e50", secondary: "#d4af37", text: "#1a252f", bg: "#ffffff" },
+            { name: "Rose Gold", primary: "#b76e79", secondary: "#e0bfb8", text: "#4a4a4a", bg: "#fffafb" },
+            { name: "Eucalyptus", primary: "#4b6b5a", secondary: "#8ba8a0", text: "#2a3a30", bg: "#f0f5f3" },
+            { name: "Midnight", primary: "#1a2a6c", secondary: "#b21f1f", text: "#ffffff", bg: "#0f172a" },
+            { name: "Terracotta", primary: "#e07a5f", secondary: "#f4f1de", text: "#3d405b", bg: "#faf9f6" },
+            { name: "Ocean", primary: "#01579b", secondary: "#4fc3f7", text: "#ffffff", bg: "#e0f7fa" },
+            { name: "Pastel Dream", primary: "#ffb6c1", secondary: "#add8e6", text: "#333333", bg: "#fdfdfd" },
+            { name: "Neon Pop", primary: "#ff007f", secondary: "#00f0ff", text: "#111111", bg: "#ffffff" },
+            { name: "Lavender", primary: "#8e44ad", secondary: "#d2b4de", text: "#342244", bg: "#faf5ff" },
+            { name: "Noir", primary: "#111111", secondary: "#888888", text: "#222222", bg: "#fafafa" }
+        ];
+
+        function makePalettes(themePrimary, themeSecondary, themeText, themeBg) {
+            let p = [...UNIVERSAL_PALETTES];
+            p[0] = { name: "Theme Default", primary: themePrimary, secondary: themeSecondary, text: themeText, bg: themeBg };
+            return p;
+        }
+
+        const ALL_THEMES_DATA = {
             "Safari Jungle": {
                 fontTitle: "'Great Vibes', cursive", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
                     <div class="absolute top-0 left-0 w-full flex justify-between px-4 pt-2 text-6xl opacity-80" style="color:${c.primary}">
-                        <span class="transform -scale-x-100 rotate-12">🌿</span>
-                        <span class="transform -translate-y-4">🍃</span>
-                        <span class="rotate-12">🌿</span>
+                        <span class="transform -scale-x-100 rotate-12">🌿</span><span class="transform -translate-y-4">🍃</span><span class="rotate-12">🌿</span>
                     </div>
-                    <div class="absolute bottom-10 left-4 text-5xl transform -scale-x-100 rotate-6 drop-shadow-md z-0">🦁</div>
-                    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 text-6xl transform scale-x-100 -rotate-6 drop-shadow-md z-0">🐘</div>
-                    <div class="absolute bottom-10 right-4 text-7xl transform -translate-y-2 drop-shadow-md z-0">🦒</div>
-                    <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(${c.primary} 1px, transparent 1px); background-size: 20px 20px;"></div>
-                `
+                    <div class="absolute bottom-6 left-4 text-5xl transform -scale-x-100 rotate-6 drop-shadow-md z-0">🦁</div>
+                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-6xl transform scale-x-100 -rotate-6 drop-shadow-md z-0">🐘</div>
+                    <div class="absolute bottom-6 right-4 text-7xl transform -translate-y-2 drop-shadow-md z-0">🦒</div>
+                `,
+                palettes: makePalettes("#2c5e3b", "#e8c972", "#333333", "#fdfbf7")
             },
             "Ocean Under Sea": {
                 fontTitle: "'Pacifico', cursive", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
                     <div class="absolute top-10 left-10 text-3xl opacity-60 animate-pulse">🫧</div>
-                    <div class="absolute top-32 right-12 text-4xl opacity-50">🫧</div>
-                    <div class="absolute bottom-40 left-8 text-2xl opacity-70">🫧</div>
-                    <div class="absolute top-4 right-4 text-6xl opacity-80 transform -rotate-12">🐠</div>
-                    <div class="absolute top-1/2 left-2 text-5xl opacity-40 transform rotate-45">🐢</div>
                     <div class="absolute bottom-6 w-full flex justify-center items-end gap-6 z-0">
-                      <span class="text-6xl transform scale-x-100 rotate-12 drop-shadow-md translate-y-2">🦀</span>
-                      <span class="text-7xl transform drop-shadow-md translate-y-3">🐙</span>
-                      <span class="text-5xl transform -scale-x-100 -rotate-12 drop-shadow-md translate-y-2">🐡</span>
+                      <span class="text-6xl transform scale-x-100 rotate-12 drop-shadow-md">🦀</span>
+                      <span class="text-7xl transform drop-shadow-md translate-y-2">🐙</span>
+                      <span class="text-5xl transform -scale-x-100 -rotate-12 drop-shadow-md">🐡</span>
                     </div>
-                    <div class="absolute bottom-2 left-0 text-6xl opacity-60 transform -rotate-12 translate-y-2">🌿</div>
-                    <div class="absolute bottom-2 right-0 text-6xl opacity-60 transform scale-x-100 rotate-12 translate-y-2">🌿</div>
-                `
+                `,
+                palettes: makePalettes("#ff7f50", "#20b2aa", "#004d40", "#e0f7fa")
             },
             "Boho Floral": {
                 fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
                     <div class="absolute -top-4 -left-4 text-8xl opacity-90 drop-shadow-sm transform -rotate-45">🌸</div>
-                    <div class="absolute top-8 -left-2 text-6xl opacity-80 drop-shadow-sm transform rotate-12">🌺</div>
                     <div class="absolute -bottom-4 -right-4 text-8xl opacity-90 drop-shadow-sm transform rotate-135">🌸</div>
-                    <div class="absolute bottom-8 -right-2 text-6xl opacity-80 drop-shadow-sm transform -rotate-12">🌺</div>
                     <div class="absolute inset-4 border rounded-lg opacity-30" style="border-color:${c.primary}"></div>
-                `
-            },
-            "Woodland Creatures": {
-                fontTitle: "'Great Vibes', cursive", fontBody: "'Montserrat', sans-serif",
-                decorations: (c) => `
-                    <div class="absolute top-0 right-4 text-6xl opacity-90 transform rotate-12 translate-y-4 z-0">🦊</div>
-                    <div class="absolute top-4 left-4 text-6xl opacity-90 transform -rotate-12 translate-y-4 z-0">🦉</div>
-                    <div class="absolute bottom-6 left-4 text-7xl opacity-90 transform -rotate-6 z-0">🐻</div>
-                    <div class="absolute bottom-6 right-4 text-6xl opacity-90 transform rotate-6 z-0">🦌</div>
-                    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-5xl opacity-80 z-0">🍄</div>
-                `
-            },
-            "Pastel Rainbow": {
-                fontTitle: "'Pacifico', cursive", fontBody: "'Montserrat', sans-serif",
-                decorations: (c) => `
-                    <div class="absolute inset-0 opacity-20 z-0" style="background: linear-gradient(135deg, ${c.primary}, ${c.secondary});"></div>
-                    <div class="absolute top-6 left-1/2 -translate-x-1/2 text-8xl opacity-80 z-0">🌈</div>
-                    <div class="absolute top-16 left-6 text-6xl opacity-70 z-0">☁️</div>
-                    <div class="absolute top-20 right-6 text-6xl opacity-70 z-0">☁️</div>
-                    <div class="absolute bottom-10 left-10 text-4xl opacity-60 z-0 animate-pulse">✨</div>
-                    <div class="absolute bottom-20 right-12 text-5xl opacity-60 z-0">✨</div>
-                `
-            },
-            "Little Sunshine": {
-                fontTitle: "'Dancing Script', cursive", fontBody: "'Montserrat', sans-serif",
-                decorations: (c) => `
-                    <div class="absolute top-0 right-0 w-40 h-40 bg-yellow-300 rounded-bl-full opacity-30 z-0"></div>
-                    <div class="absolute top-2 right-2 text-8xl opacity-90 animate-pulse z-0">☀️</div>
-                    <div class="absolute bottom-0 left-0 text-7xl transform -scale-x-100 translate-y-4 translate-x-2 z-0">🌻</div>
-                    <div class="absolute bottom-0 right-0 text-7xl translate-y-4 -translate-x-2 z-0">🌻</div>
-                `
-            },
-            "Magical Unicorn": {
-                fontTitle: "'Pacifico', cursive", fontBody: "'Montserrat', sans-serif",
-                decorations: (c) => `
-                    <div class="absolute top-4 left-4 text-5xl opacity-80 z-0">🎀</div>
-                    <div class="absolute top-6 right-8 text-4xl opacity-70 animate-pulse z-0">✨</div>
-                    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 text-8xl drop-shadow-lg z-0">🦄</div>
-                    <div class="absolute bottom-10 left-6 text-4xl opacity-60 z-0">💖</div>
-                    <div class="absolute bottom-12 right-6 text-5xl opacity-60 z-0">⭐</div>
-                `
-            },
-            "Superhero Comic": {
-                fontTitle: "'Montserrat', sans-serif", fontBody: "'Montserrat', sans-serif",
-                decorations: (c) => `
-                    <div class="absolute inset-0 opacity-10 z-0" style="background-image: radial-gradient(${c.primary} 3px, transparent 3px); background-size: 15px 15px;"></div>
-                    <div class="absolute top-4 left-4 text-7xl transform -rotate-12 drop-shadow-md z-0">💥</div>
-                    <div class="absolute bottom-10 right-4 text-7xl transform rotate-12 drop-shadow-md z-0">⚡</div>
-                    <div class="absolute bottom-6 left-6 text-7xl z-0">🦸‍♂️</div>
-                `
-            },
-            "Dinosaur Park": {
-                fontTitle: "'Montserrat', sans-serif", fontBody: "'Montserrat', sans-serif",
-                decorations: (c) => `
-                    <div class="absolute top-0 left-0 text-7xl transform -scale-x-100 rotate-12 -translate-y-2 z-0">🌿</div>
-                    <div class="absolute top-0 right-0 text-7xl rotate-12 -translate-y-2 z-0">🌿</div>
-                    <div class="absolute bottom-6 left-4 text-7xl transform -scale-x-100 drop-shadow-sm z-0">🦕</div>
-                    <div class="absolute bottom-6 right-4 text-7xl drop-shadow-sm z-0">🦖</div>
-                    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 text-6xl z-0">🌋</div>
-                `
-            },
-            "Elegant Greenery": {
-                fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
-                decorations: (c) => `
-                    <div class="absolute top-0 left-0 text-8xl opacity-80 transform -rotate-45 -translate-x-4 -translate-y-4 z-0">🌿</div>
-                    <div class="absolute bottom-0 right-0 text-8xl opacity-80 transform rotate-135 translate-x-4 translate-y-4 z-0">🌿</div>
-                    <div class="absolute inset-6 border border-opacity-40 z-0 pointer-events-none" style="border-color:${c.primary}"></div>
-                `
-            },
-            "Romantic Rose": {
-                fontTitle: "'Great Vibes', cursive", fontBody: "'Montserrat', sans-serif",
-                decorations: (c) => `
-                    <div class="absolute top-0 left-0 text-7xl opacity-90 transform -rotate-12 z-0">🌹</div>
-                    <div class="absolute bottom-0 right-0 text-7xl opacity-90 transform rotate-12 z-0">🌹</div>
-                    <div class="absolute top-8 right-8 text-4xl opacity-60 z-0">🥀</div>
-                    <div class="absolute bottom-8 left-8 text-4xl opacity-60 z-0">🥀</div>
-                    <div class="absolute inset-4 border-2 border-dashed opacity-30 z-0 pointer-events-none" style="border-color:${c.primary}"></div>
-                `
-            },
-            "Tea Party": {
-                fontTitle: "'Dancing Script', cursive", fontBody: "'Montserrat', sans-serif",
-                decorations: (c) => `
-                    <div class="absolute top-6 left-6 text-6xl transform -rotate-12 drop-shadow-sm z-0">🫖</div>
-                    <div class="absolute top-8 right-8 text-5xl transform rotate-12 drop-shadow-sm z-0">🧁</div>
-                    <div class="absolute bottom-6 left-8 text-6xl z-0">🌸</div>
-                    <div class="absolute bottom-6 right-8 text-6xl transform -scale-x-100 z-0">🌸</div>
-                    <div class="absolute inset-0 opacity-[0.03] z-0 pointer-events-none" style="background-image: repeating-linear-gradient(45deg, ${c.primary} 0, ${c.primary} 2px, transparent 2px, transparent 10px);"></div>
-                `
-            },
-            "Classic Gold": {
-                fontTitle: "'Cinzel', serif", fontBody: "'Montserrat', sans-serif",
-                decorations: (c) => `
-                    <div class="absolute top-6 left-1/2 -translate-x-1/2 text-7xl drop-shadow-md z-0">🎓</div>
-                    <div class="absolute bottom-8 left-10 text-6xl transform -rotate-12 z-0">🥂</div>
-                    <div class="absolute bottom-10 right-10 text-5xl transform rotate-12 z-0">⭐</div>
-                    <div class="absolute inset-4 border-4 opacity-90 z-0 pointer-events-none" style="border-color:${c.secondary}"></div>
-                    <div class="absolute inset-5 border border-opacity-50 z-0 pointer-events-none" style="border-color:${c.secondary}"></div>
-                `
+                `,
+                palettes: makePalettes("#b76e79", "#e0bfb8", "#4a4a4a", "#fffafb")
             },
             "Modern Minimalist": {
                 fontTitle: "'Montserrat', sans-serif", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
-                    <div class="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-20 z-0" style="background-color:${c.primary}"></div>
-                    <div class="absolute bottom-0 left-0 w-48 h-48 rounded-tr-full opacity-20 z-0" style="background-color:${c.secondary}"></div>
-                    <div class="absolute top-1/2 left-4 w-1 h-32 transform -translate-y-1/2 opacity-30 z-0" style="background-color:${c.primary}"></div>
-                `
+                    <div class="absolute top-0 right-0 w-32 h-32 rounded-bl-full opacity-20" style="background-color:${c.primary}"></div>
+                    <div class="absolute bottom-0 left-0 w-48 h-48 rounded-tr-full opacity-20" style="background-color:${c.secondary}"></div>
+                    <div class="absolute top-1/2 left-4 w-1 h-32 transform -translate-y-1/2 opacity-30" style="background-color:${c.primary}"></div>
+                `,
+                palettes: makePalettes("#222222", "#888888", "#111111", "#ffffff")
             },
             "Cosmic Space": {
                 fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
-                    <div class="absolute inset-0 opacity-10 z-0" style="background-color:${c.secondary}"></div>
-                    <div class="absolute top-8 left-8 text-4xl opacity-80 animate-pulse z-0">✨</div>
-                    <div class="absolute bottom-24 left-10 text-2xl opacity-70 z-0">🌟</div>
-                    <div class="absolute top-32 left-4 text-6xl opacity-90 transform -rotate-12 z-0">🌙</div>
-                    <div class="absolute bottom-12 right-8 text-7xl opacity-90 transform rotate-12 z-0">🚀</div>
-                `
+                    <div class="absolute top-8 left-8 text-4xl opacity-80 animate-pulse">✨</div>
+                    <div class="absolute top-32 left-4 text-6xl opacity-90 transform -rotate-12">🌙</div>
+                    <div class="absolute bottom-12 right-8 text-7xl opacity-90 transform rotate-12">🚀</div>
+                `,
+                palettes: makePalettes("#1a2a6c", "#b21f1f", "#ffffff", "#0f172a")
             },
-            "Rustic Winter": {
+            "All-Star Sports": {
+                fontTitle: "'Montserrat', sans-serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-8 right-8 text-6xl opacity-80 transform rotate-12">🏀</div>
+                    <div class="absolute bottom-12 left-8 text-6xl opacity-90 transform -rotate-12">⚽</div>
+                    <div class="absolute inset-4 border-4 border-dashed opacity-30" style="border-color:${c.primary}"></div>
+                `,
+                palettes: makePalettes("#c9082a", "#17408b", "#111111", "#f0f0f0")
+            },
+            "Racing Cars": {
+                fontTitle: "'Montserrat', sans-serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute bottom-12 w-full flex justify-center gap-8 text-7xl z-0">🏎️ 💨 🏁</div>
+                    <div class="absolute top-0 w-full h-4" style="background-image: repeating-linear-gradient(45deg, #000 0, #000 10px, #fff 10px, #fff 20px);"></div>
+                `,
+                palettes: makePalettes("#e3000f", "#000000", "#111111", "#ffffff")
+            },
+            "Magical Unicorn": {
+                fontTitle: "'Dancing Script', cursive", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-4 w-full text-center text-7xl opacity-90">🦄</div>
+                    <div class="absolute top-16 left-8 text-4xl opacity-80 animate-pulse">✨</div>
+                    <div class="absolute top-16 right-8 text-4xl opacity-80 animate-pulse">✨</div>
+                `,
+                palettes: makePalettes("#ff99cc", "#cc99ff", "#333333", "#fff0f5")
+            },
+            "Toon Town": {
+                fontTitle: "'Pacifico', cursive", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-6 left-6 text-6xl transform -rotate-12">🎈</div>
+                    <div class="absolute top-6 right-6 text-6xl transform rotate-12">🎨</div>
+                    <div class="absolute bottom-10 left-10 text-6xl">🧸</div>
+                    <div class="absolute bottom-10 right-10 text-6xl">🧩</div>
+                `,
+                palettes: makePalettes("#ff4500", "#ffd700", "#333333", "#e0ffff")
+            },
+            "Classic Gold": {
+                fontTitle: "'Cinzel', serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute inset-4 border-2 opacity-80" style="border-color:${c.secondary}"></div>
+                    <div class="absolute top-8 w-full text-center text-6xl opacity-90">🎓</div>
+                `,
+                palettes: makePalettes("#000000", "#d4af37", "#111111", "#ffffff")
+            },
+            "Woodland Creatures": {
                 fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
-                    <div class="absolute inset-5 border-2 border-opacity-40 z-0" style="border-color:${c.primary}"></div>
-                    <div class="absolute top-8 left-8 text-4xl opacity-60 z-0">❄️</div>
-                    <div class="absolute bottom-1/4 right-6 text-4xl opacity-40 z-0">❄️</div>
-                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 text-6xl opacity-80 z-0">🦌</div>
-                    <div class="absolute bottom-8 left-4 text-6xl opacity-70 z-0">🌲</div>
-                    <div class="absolute bottom-8 right-4 text-5xl opacity-70 z-0">🌲</div>
-                `
+                    <div class="absolute top-0 left-0 w-full flex justify-between px-4 pt-2 text-6xl opacity-80" style="color:${c.primary}">🌲 🌲</div>
+                    <div class="absolute bottom-6 left-6 text-6xl drop-shadow-md z-0">🦊</div>
+                    <div class="absolute bottom-6 right-6 text-6xl drop-shadow-md z-0 transform -scale-x-100">🐻</div>
+                    <div class="absolute top-1/4 right-8 text-5xl drop-shadow-md z-0">🦉</div>
+                `,
+                palettes: makePalettes("#5d4037", "#8d6e63", "#3e2723", "#efebe9")
+            },
+            "Pastel Rainbow": {
+                fontTitle: "'Pacifico', cursive", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-4 w-full flex justify-center text-8xl drop-shadow-sm opacity-90 z-0">🌈</div>
+                    <div class="absolute top-16 left-10 text-6xl opacity-80">☁️</div>
+                    <div class="absolute top-16 right-10 text-6xl opacity-80">☁️</div>
+                    <div class="absolute bottom-10 left-12 text-4xl opacity-70 animate-pulse">✨</div>
+                    <div class="absolute bottom-16 right-12 text-4xl opacity-70 animate-pulse">✨</div>
+                `,
+                palettes: makePalettes("#ffb3ba", "#baffc9", "#333333", "#fdfdfd")
+            },
+            "Little Sunshine": {
+                fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute -top-10 -right-10 text-[150px] opacity-90 drop-shadow-md animate-[spin_60s_linear_infinite]">☀️</div>
+                    <div class="absolute bottom-4 left-4 text-7xl opacity-90">🌻</div>
+                    <div class="absolute bottom-4 right-8 text-5xl opacity-80">💛</div>
+                `,
+                palettes: makePalettes("#f5b041", "#f4d03f", "#512e5f", "#fef9e7")
+            },
+            "Superhero Comic": {
+                fontTitle: "'Montserrat', sans-serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-4 right-4 text-6xl drop-shadow-lg transform rotate-12">💥</div>
+                    <div class="absolute bottom-12 left-4 text-7xl drop-shadow-lg transform -rotate-12">🦸‍♂️</div>
+                    <div class="absolute top-1/3 left-4 text-5xl drop-shadow-md opacity-80">⚡</div>
+                    <div class="absolute inset-4 border-8 opacity-90 border-dotted" style="border-color:${c.primary}"></div>
+                `,
+                palettes: makePalettes("#e74c3c", "#f1c40f", "#2c3e50", "#f4f6f7")
+            },
+            "Dinosaur Park": {
+                fontTitle: "'Montserrat', sans-serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute bottom-8 left-4 text-8xl drop-shadow-lg z-0 transform -scale-x-100">🦖</div>
+                    <div class="absolute bottom-8 right-4 text-7xl drop-shadow-lg z-0">🦕</div>
+                    <div class="absolute top-4 right-4 text-6xl opacity-70">🌋</div>
+                    <div class="absolute top-4 left-4 text-6xl opacity-80">🌴</div>
+                `,
+                palettes: makePalettes("#27ae60", "#2ecc71", "#145a32", "#e9f7ef")
             },
             "Vintage Art Deco": {
                 fontTitle: "'Cinzel', serif", fontBody: "'Montserrat', sans-serif",
                 decorations: (c) => `
-                    <div class="absolute inset-4 border-2 opacity-80 z-0" style="border-color:${c.secondary}"></div>
-                    <div class="absolute top-4 left-4 w-12 h-12 border-t-4 border-l-4 opacity-80 z-0" style="border-color:${c.secondary}"></div>
-                    <div class="absolute bottom-4 right-4 w-12 h-12 border-b-4 border-r-4 opacity-80 z-0" style="border-color:${c.secondary}"></div>
-                    <div class="absolute inset-0 opacity-[0.02] z-0" style="background-image: repeating-linear-gradient(45deg, ${c.secondary} 0, ${c.secondary} 1px, transparent 0, transparent 50%); background-size: 10px 10px;"></div>
-                `
+                    <div class="absolute inset-4 border-4 opacity-80" style="border-color:${c.secondary}"></div>
+                    <div class="absolute inset-6 border opacity-50" style="border-color:${c.secondary}"></div>
+                    <div class="absolute top-2 left-1/2 transform -translate-x-1/2 text-4xl" style="color:${c.secondary}">❖</div>
+                    <div class="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-4xl" style="color:${c.secondary}">❖</div>
+                    <div class="absolute top-12 left-8 text-5xl opacity-80">🍸</div>
+                `,
+                palettes: makePalettes("#d4af37", "#111111", "#f8f9fa", "#000000")
+            },
+            "Elegant Greenery": {
+                fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-0 left-0 text-8xl opacity-80 transform -rotate-45 -translate-y-4 -translate-x-4">🌿</div>
+                    <div class="absolute bottom-0 right-0 text-8xl opacity-80 transform rotate-135 translate-y-4 translate-x-4">🌿</div>
+                    <div class="absolute top-4 right-4 text-5xl opacity-60">🍃</div>
+                `,
+                palettes: makePalettes("#2e4034", "#7b9783", "#1a251e", "#f4f7f5")
+            },
+            "Romantic Rose": {
+                fontTitle: "'Great Vibes', cursive", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-4 left-4 text-7xl opacity-90 drop-shadow-sm">🌹</div>
+                    <div class="absolute bottom-4 right-4 text-7xl opacity-90 drop-shadow-sm transform -scale-x-100">🌹</div>
+                    <div class="absolute top-1/2 left-4 text-4xl opacity-50">🥀</div>
+                    <div class="absolute top-1/2 right-4 text-4xl opacity-50">🥀</div>
+                `,
+                palettes: makePalettes("#922b21", "#d98880", "#4a2311", "#fdedec")
+            },
+            "Tea Party": {
+                fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-6 left-6 text-7xl drop-shadow-sm transform -rotate-12">🫖</div>
+                    <div class="absolute top-8 right-6 text-6xl drop-shadow-sm transform rotate-12">☕</div>
+                    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-6xl drop-shadow-sm">🧁</div>
+                    <div class="absolute inset-3 border-2 border-dashed opacity-40 rounded-3xl" style="border-color:${c.primary}"></div>
+                `,
+                palettes: makePalettes("#af7ac5", "#f5b7b1", "#5b2c6f", "#fbfafc")
+            },
+            "Midnight Glamour": {
+                fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
+                decorations: (c) => `
+                    <div class="absolute top-6 right-8 text-7xl opacity-90 drop-shadow-lg">🌙</div>
+                    <div class="absolute bottom-10 left-8 text-6xl opacity-90 transform -rotate-12">🥂</div>
+                    <div class="absolute bottom-10 right-8 text-6xl opacity-90 transform rotate-12">🎩</div>
+                    <div class="absolute top-20 left-12 text-3xl opacity-80 animate-pulse">✨</div>
+                `,
+                palettes: makePalettes("#f1c40f", "#bdc3c7", "#ffffff", "#17202a")
             }
         };
+
+        // Fill in any completely unhandled edge cases (just in case)
+        const ALL_THEME_NAMES = [...new Set(Object.values(OCCASION_THEMES).flat())];
+        ALL_THEME_NAMES.forEach(tName => {
+            if(!ALL_THEMES_DATA[tName]) {
+                ALL_THEMES_DATA[tName] = {
+                    fontTitle: "'Playfair Display', serif", fontBody: "'Montserrat', sans-serif",
+                    decorations: (c) => `<div class="absolute inset-4 border border-opacity-30 rounded" style="border-color:${c.primary}"></div>`,
+                    palettes: makePalettes("#333333", "#666666", "#111111", "#ffffff")
+                };
+            }
+        });
 
         const INPUT_FIELDS = [
             { label: "Host / Intro Line", name: "hostText", type: "text" },
@@ -480,12 +477,12 @@
             { label: "Additional Info (Registry)", name: "registry", type: "text" }
         ];
 
-        // --- GLOBAL APP STATE ---
+        // --- STREAMING_CHUNK:Global State ---
         let state = {
             occasion: "Baby Shower",
-            theme: "Safari Jungle", // This will be dynamically updated
+            theme: "Safari Jungle",
+            pattern: "None",
             paletteIndex: 0,
-            isLocked: false,
             content: {
                 hostText: "Please join us for a",
                 title: "Baby Shower",
@@ -497,56 +494,69 @@
                 rsvp: "RSVP to Sarah by October 10th\n(555) 123-4567",
                 registry: "Registered at Target & Amazon"
             },
-            styles: {}, // Custom fonts and sizes per field
-            graphics: [] // Custom emojis/photos
+            styles: {}, 
+            graphics: [] 
         };
 
         // --- STREAMING_CHUNK:Rendering Engine ---
         function renderPreview() {
             try {
-                const palette = COLOR_PALETTES[state.theme][state.paletteIndex];
-                const themeDef = THEMES[state.theme];
+                const themeDef = ALL_THEMES_DATA[state.theme];
+                const palette = themeDef.palettes[state.paletteIndex];
                 const card = document.getElementById('invitation-card-capture');
 
-                // 1. Base Colors
+                // 1. Set Base Backgrounds
                 card.style.backgroundColor = palette.bg;
-                card.style.color = palette.text;
-                document.getElementById('preview-title').style.color = palette.primary;
-                document.getElementById('preview-name').style.color = palette.secondary;
                 document.getElementById('preview-date-divider').style.borderColor = palette.primary + '40';
-                document.getElementById('preview-rsvp').style.color = palette.primary;
-                document.getElementById('preview-registry').style.color = palette.text;
+                
+                // 2. Render SVG Background Pattern via Base64 Injection
+                const patternDef = PATTERNS.find(p => p.name === state.pattern);
+                if (patternDef && patternDef.value !== 'none') {
+                    // Inject theme color into SVG
+                    const svgString = patternDef.value.replace(/currentColor/g, palette.primary);
+                    // Safe Encode to prevent rendering bugs
+                    const base64 = window.btoa(svgString);
+                    document.getElementById('preview-pattern-layer').style.backgroundImage = `url("data:image/svg+xml;base64,${base64}")`;
+                    document.getElementById('preview-pattern-layer').style.backgroundSize = '40px 40px';
+                } else {
+                    document.getElementById('preview-pattern-layer').style.backgroundImage = 'none';
+                }
 
-                // 2. Theme Decorations
+                // 3. Render Theme Decorations
                 document.getElementById('preview-decorations').innerHTML = themeDef.decorations(palette);
 
-                // 3. Text Content & Typography
+                // 4. Render Text & Individual Colors
                 INPUT_FIELDS.forEach(field => {
                     const el = document.getElementById('preview-' + field.name);
                     if(!el) return;
                     
-                    // Container toggle logic
                     if(field.name === 'registry') {
                         document.getElementById('preview-registry-container').style.display = state.content.registry ? 'inline-block' : 'none';
                     }
 
-                    // Apply Styles
                     const isTitle = ['title', 'name'].includes(field.name);
                     const defaultFont = isTitle ? themeDef.fontTitle : themeDef.fontBody;
                     const customStyle = state.styles[field.name] || {};
                     
+                    // Determine smart default color based on text line
+                    let defaultColor = palette.text;
+                    if (['title', 'rsvp'].includes(field.name)) defaultColor = palette.primary;
+                    if (field.name === 'name') defaultColor = palette.secondary;
+
+                    // Apply Styles
                     el.style.fontFamily = (customStyle.font && customStyle.font !== 'default') ? customStyle.font : defaultFont;
-                    
-                    // Special rule for Boho/Safari name field
+                    el.style.color = customStyle.color || defaultColor;
+
+                    // Override Boho script rule
                     if(field.name === 'name' && (!customStyle.font || customStyle.font === 'default')) {
                         if(state.theme === 'Boho Floral' || state.theme === 'Safari Jungle') {
                             el.style.fontFamily = "'Great Vibes', cursive";
                         }
                     }
 
-                    // Wrap text in a span for relative em-sizing, so it respects the gorgeous base sizes!
+                    // Span wrap for scale retention
                     const size = customStyle.size || '1em';
-                    el.innerHTML = ''; // Clear previous
+                    el.innerHTML = ''; 
                     const span = document.createElement('span');
                     span.style.fontSize = size;
                     span.innerText = state.content[field.name];
@@ -559,14 +569,9 @@
             }
         }
 
-        // --- STREAMING_CHUNK:Graphics Engine (Drag & Drop) ---
+        // --- STREAMING_CHUNK:Graphics & QR Engine ---
         function addGraphic(type, src) {
-            state.graphics.push({
-                id: Date.now(),
-                type: type,
-                src: src,
-                x: 200, y: 300, size: 80
-            });
+            state.graphics.push({ id: Date.now(), type: type, src: src, x: 200, y: 300, size: (type==='qr'?100:80) });
             renderGraphics();
             updateGraphicsList();
         }
@@ -575,6 +580,31 @@
             state.graphics = state.graphics.filter(g => g.id !== id);
             renderGraphics();
             updateGraphicsList();
+        }
+
+        function generateQRCode() {
+            const val = document.getElementById('qr-input').value;
+            if(!val) return;
+            
+            const tempDiv = document.getElementById('qr-temp');
+            tempDiv.innerHTML = ''; // clear
+            
+            new QRCode(tempDiv, {
+                text: val,
+                width: 200,
+                height: 200,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            
+            setTimeout(() => {
+                const canvas = tempDiv.querySelector('canvas');
+                if(canvas) {
+                    addGraphic('image', canvas.toDataURL("image/png"));
+                    document.getElementById('qr-input').value = '';
+                }
+            }, 100);
         }
 
         function renderGraphics() {
@@ -595,6 +625,8 @@
                 } else {
                     const img = document.createElement('img');
                     img.src = g.src;
+                    // Protect image dragging from native browser ghosts
+                    img.ondragstart = () => false;
                     el.appendChild(img);
                 }
 
@@ -620,7 +652,6 @@
                     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                     
-                    // Card is exactly 500x700 mathematically, we need to factor the CSS transform scale
                     const wrapper = document.getElementById('scale-wrapper');
                     const scale = wrapper.style.transform ? parseFloat(wrapper.style.transform.replace(/[^\d.]/g, '')) : 1;
                     
@@ -629,11 +660,7 @@
                     el.style.left = g.x + 'px';
                     el.style.top = g.y + 'px';
                 }
-
-                function stopDrag() {
-                    isDragging = false;
-                }
-
+                function stopDrag() { isDragging = false; }
                 container.appendChild(el);
             });
         }
@@ -649,7 +676,7 @@
                         ${g.type === 'emoji' ? g.src : '<img src="'+g.src+'" class="w-full h-full object-cover">'}
                     </span>
                     <input type="range" min="20" max="300" value="${g.size}" class="flex-1" oninput="updateGraphicSize(${g.id}, this.value)">
-                    <button class="text-red-500 hover:bg-red-50 p-1 rounded" onclick="removeGraphic(${g.id})">🗑️</button>
+                    <button class="text-red-500 hover:bg-red-50 p-1 rounded font-bold" onclick="removeGraphic(${g.id})">×</button>
                 `;
                 list.appendChild(row);
             });
@@ -661,79 +688,66 @@
             renderGraphics();
         }
 
-        // --- STREAMING_CHUNK:UI Initialization ---
+        // --- STREAMING_CHUNK:UI Controls & Initialization ---
         function initUI() {
-            // Smart URL Occasion Lock
-            const params = new URLSearchParams(window.location.search);
-            const urlOccasion = params.get('occasion');
-            if (urlOccasion && OCCASIONS.includes(urlOccasion)) {
-                state.occasion = urlOccasion;
-                state.isLocked = true;
-                state.content.title = urlOccasion;
-                // Ensure the current theme is valid for the locked occasion
-                if (!OCCASION_THEMES[urlOccasion].includes(state.theme)) {
-                    state.theme = OCCASION_THEMES[urlOccasion][0];
+            // Occasion Filter
+            const select = document.getElementById('input-occasion');
+            select.innerHTML = ''; 
+            OCCASIONS.forEach(occ => select.add(new Option(occ, occ)));
+            select.value = state.occasion;
+            select.onchange = (e) => {
+                state.occasion = e.target.value;
+                state.content.title = e.target.value;
+                // Force theme update if current theme isn't in new occasion list
+                const allowedThemes = OCCASION_THEMES[state.occasion];
+                if (!allowedThemes.includes(state.theme)) {
+                    state.theme = allowedThemes[0];
+                    state.paletteIndex = 0;
                 }
-                
-                document.getElementById('occasion-container').innerHTML = `
-                    <div class="w-full p-2.5 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 flex items-center justify-between cursor-not-allowed">
-                        <span>${urlOccasion}</span>
-                        <span class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1">Locked</span>
-                    </div>`;
-            } else {
-                const select = document.getElementById('input-occasion');
-                select.innerHTML = ''; // FIX: Clear existing options before adding to prevent duplicates
-                OCCASIONS.forEach(occ => select.add(new Option(occ, occ)));
-                select.value = state.occasion;
-                select.onchange = (e) => {
-                    state.occasion = e.target.value;
-                    state.content.title = e.target.value;
-                    
-                    // Smart Theme Switcher: If the old theme isn't allowed for the new occasion, pick the first allowed one
-                    const allowedThemes = OCCASION_THEMES[state.occasion];
-                    if (!allowedThemes.includes(state.theme)) {
-                        state.theme = allowedThemes[0];
-                        state.paletteIndex = 0;
-                    }
+                initUI(); // rebuild entire UI to map new buttons
+                renderPreview();
+            };
 
-                    initUI(); // Re-render the whole UI to show new buttons
-                    buildTextInputs(); // Rebuild to show new title
-                    renderPreview();
-                };
-            }
-
-            // Theme Buttons (Now Filtered!)
+            // Theme Buttons (Filtered by Occasion)
             const themeContainer = document.getElementById('theme-buttons');
             themeContainer.innerHTML = ''; 
+            const allowedThemes = OCCASION_THEMES[state.occasion];
             
-            // Only loop through themes allowed for the CURRENT occasion
-            const availableThemes = OCCASION_THEMES[state.occasion];
-            
-            availableThemes.forEach(t => {
+            allowedThemes.forEach(t => {
                 const btn = document.createElement('button');
                 btn.innerText = t;
-                btn.className = `py-2 px-3 text-sm rounded-lg border text-center transition-all ${state.theme === t ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold' : 'bg-white text-gray-600 hover:bg-gray-50'}`;
+                btn.className = `py-2 px-2 text-xs rounded-lg border text-center transition-all ${state.theme === t ? 'bg-blue-50 border-blue-500 text-blue-700 font-bold' : 'bg-white text-gray-600 hover:bg-gray-50'}`;
                 btn.onclick = () => {
                     state.theme = t;
-                    state.paletteIndex = 0; // Reset palette
-                    initUI(); // Re-render UI to update palettes
+                    state.paletteIndex = 0; 
+                    initUI(); 
                     renderPreview();
                 };
                 themeContainer.appendChild(btn);
             });
 
+            // Background Patterns
+            const patSelect = document.getElementById('input-pattern');
+            patSelect.innerHTML = '';
+            PATTERNS.forEach(p => patSelect.add(new Option(p.name, p.name)));
+            patSelect.value = state.pattern;
+            patSelect.onchange = (e) => {
+                state.pattern = e.target.value;
+                renderPreview();
+            };
+
             // Palette Buttons
             const palContainer = document.getElementById('palette-buttons');
             palContainer.innerHTML = '';
-            COLOR_PALETTES[state.theme].forEach((pal, idx) => {
+            ALL_THEMES_DATA[state.theme].palettes.forEach((pal, idx) => {
                 const btn = document.createElement('button');
-                btn.className = `group flex flex-col items-center gap-1 p-2 rounded-lg border transition-all ${state.paletteIndex === idx ? 'border-blue-500 bg-blue-50' : 'border-transparent hover:bg-gray-100'}`;
+                btn.className = `group flex flex-col items-center gap-1 p-1 rounded-lg border transition-all ${state.paletteIndex === idx ? 'border-blue-500 bg-blue-50' : 'border-transparent hover:bg-gray-100'}`;
+                btn.title = pal.name;
                 btn.innerHTML = `
-                    <div class="flex overflow-hidden rounded-full border border-gray-200 w-10 h-10 shadow-sm pointer-events-none">
+                    <div class="flex overflow-hidden rounded-full border border-gray-200 w-8 h-8 shadow-sm pointer-events-none">
                         <div class="h-full w-1/2" style="background-color: ${pal.primary}"></div>
                         <div class="h-full w-1/2" style="background-color: ${pal.secondary}"></div>
                     </div>
-                    <span class="text-[10px] ${state.paletteIndex === idx ? 'text-blue-700 font-bold' : 'text-gray-500'}">${pal.name}</span>
                 `;
                 btn.onclick = () => {
                     state.paletteIndex = idx;
@@ -745,7 +759,7 @@
 
             buildTextInputs();
             
-            // Photo Upload Listener
+            // Photo Upload
             document.getElementById('photo-upload').onchange = function(e) {
                 if(e.target.files && e.target.files[0]) {
                     const reader = new FileReader();
@@ -755,7 +769,7 @@
             };
         }
 
-        // --- STREAMING_CHUNK:Building Editor Inputs ---
+        // --- STREAMING_CHUNK:Text Inputs & Color Picker ---
         let activeStyleField = null;
         function buildTextInputs() {
             const container = document.getElementById('text-inputs-container');
@@ -765,7 +779,6 @@
                 const div = document.createElement('div');
                 div.className = 'relative';
                 
-                // Label and Aa button
                 let html = `
                     <div class="flex justify-between items-center mb-1">
                         <label class="block text-xs font-semibold text-gray-600">${field.label}</label>
@@ -773,11 +786,18 @@
                     </div>
                 `;
 
-                // Style Panel
+                // The Typography & Color Picker Panel
                 if(activeStyleField === field.name) {
                     const curStyle = state.styles[field.name] || {};
+                    const palette = ALL_THEMES_DATA[state.theme].palettes[state.paletteIndex];
+                    
+                    let defColor = palette.text;
+                    if (['title', 'rsvp'].includes(field.name)) defColor = palette.primary;
+                    if (field.name === 'name') defColor = palette.secondary;
+                    const currentColor = curStyle.color || defColor;
+
                     html += `
-                        <div class="flex gap-2 mb-2 p-2 bg-slate-50 rounded-lg border border-slate-200 shadow-inner">
+                        <div class="flex gap-2 mb-2 p-2 bg-slate-50 rounded-lg border border-slate-200 shadow-inner items-center">
                             <div class="flex-1">
                                 <select onchange="updateStyle('${field.name}', 'font', this.value)" class="w-full text-xs p-1.5 rounded border border-gray-300 bg-white">
                                     ${POPULAR_FONTS.map(f => `<option value="${f.value}" ${curStyle.font === f.value ? 'selected' : ''}>${f.label}</option>`).join('')}
@@ -788,11 +808,15 @@
                                     ${FONT_SIZES.map(s => `<option value="${s.value}" ${curStyle.size === s.value || (!curStyle.size && s.value === '1em') ? 'selected' : ''}>${s.label}</option>`).join('')}
                                 </select>
                             </div>
+                            <div class="w-8 h-8 flex-shrink-0 relative rounded border border-gray-300 overflow-hidden" title="Text Color">
+                                <input type="color" oninput="updateStyle('${field.name}', 'color', this.value, true)" onchange="updateStyle('${field.name}', 'color', this.value, false)" value="${currentColor}" class="w-[150%] h-[150%] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-0 border-0 cursor-pointer bg-transparent">
+                            </div>
+                            ${curStyle.color ? `<button onclick="updateStyle('${field.name}', 'color', null)" class="text-xl text-gray-400 hover:text-red-500 px-1 font-bold leading-none" title="Reset Color">&times;</button>` : ''}
                         </div>
                     `;
                 }
 
-                // Input Box
+                // 16px (text-base) inputs for iOS Zoom prevention
                 if (field.name === 'title') {
                     html += `
                         <div class="relative flex items-center">
@@ -816,10 +840,13 @@
             buildTextInputs();
         }
 
-        function updateStyle(fieldName, prop, val) {
+        function updateStyle(fieldName, prop, val, isLivePreview = false) {
             if(!state.styles[fieldName]) state.styles[fieldName] = {};
-            state.styles[fieldName][prop] = val;
+            if (val === null) delete state.styles[fieldName][prop];
+            else state.styles[fieldName][prop] = val;
+            
             renderPreview();
+            if (prop === 'color' && !isLivePreview) buildTextInputs();
         }
 
         function updateContent(fieldName, val) {
@@ -827,7 +854,7 @@
             renderPreview();
         }
 
-        // --- STREAMING_CHUNK:Mobile Viewport Scaling ---
+        // --- STREAMING_CHUNK:Export & Layout Logic ---
         function adjustScale() {
             const previewArea = document.getElementById('preview-area');
             const scaleWrapper = document.getElementById('scale-wrapper');
@@ -835,21 +862,18 @@
             
             const availableWidth = previewArea.clientWidth - 32;
             const availableHeight = previewArea.clientHeight - 60;
-            
             const scaleWidth = availableWidth / 500;
             const scaleHeight = availableHeight / 700;
             
             let scale = Math.min(scaleWidth, scaleHeight);
             if (scale > 1.2) scale = 1.2; 
-            
             scaleWrapper.style.transform = `scale(${scale})`;
         }
 
-        // --- STREAMING_CHUNK:Safe iOS Download Logic ---
         document.getElementById('download-btn').addEventListener('click', async () => {
             const btn = document.getElementById('download-btn');
             const cardElement = document.getElementById('invitation-card-capture');
-            const currentPalette = COLOR_PALETTES[state.theme][state.paletteIndex];
+            const palette = ALL_THEMES_DATA[state.theme].palettes[state.paletteIndex];
             
             btn.disabled = true;
             btn.classList.add('bg-blue-400', 'cursor-wait');
@@ -859,38 +883,36 @@
             document.getElementById('download-text').innerText = "Generating...";
 
             try {
-                // Ensure emojis and graphics are positioned perfectly before capture
                 const wrapper = document.getElementById('scale-wrapper');
-                const oldTransform = wrapper.style.transform;
                 
                 const canvas = await html2canvas(cardElement, {
-                    scale: 3, // 1500x2100 Output
+                    scale: 3, 
                     useCORS: true,
-                    backgroundColor: currentPalette.bg,
+                    backgroundColor: palette.bg,
                     logging: false,
                     width: 500,
                     height: 700,
                     scrollY: -window.scrollY,
                     scrollX: -window.scrollX,
                     onclone: (clonedDoc) => {
-                        // Negate CSS transform during clone to prevent scaling offset bugs
                         const clonedWrapper = clonedDoc.getElementById('scale-wrapper');
                         if(clonedWrapper) clonedWrapper.style.transform = 'scale(1)';
                     }
                 });
 
-                // iOS Safe Download (Blob instead of Base64)
+                // iOS Safe Download via Blob
                 canvas.toBlob((blob) => {
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.download = `${state.theme.replace(/\s+/g, '-')}-Invitation.png`;
                     link.href = url;
                     link.click();
-                    setTimeout(() => URL.revokeObjectURL(url), 100); // Cleanup memory
+                    setTimeout(() => URL.revokeObjectURL(url), 100); 
                 }, 'image/png');
 
             } catch (error) {
                 console.error("Export failed:", error);
+                alert("Export failed. Please try again on a modern browser.");
             } finally {
                 btn.disabled = false;
                 btn.classList.remove('bg-blue-400', 'cursor-wait');
@@ -901,13 +923,11 @@
             }
         });
 
-        // --- STREAMING_CHUNK:Boot Sequence ---
         window.addEventListener('resize', adjustScale);
         window.onload = () => {
             initUI();
             renderPreview();
             adjustScale();
-            // Trigger scale again to guarantee layout after fonts load
             setTimeout(adjustScale, 500); 
         };
     </script>
