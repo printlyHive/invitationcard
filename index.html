@@ -690,23 +690,55 @@
 
         // --- STREAMING_CHUNK:UI Controls & Initialization ---
         function initUI() {
-            // Occasion Filter
-            const select = document.getElementById('input-occasion');
-            select.innerHTML = ''; 
-            OCCASIONS.forEach(occ => select.add(new Option(occ, occ)));
-            select.value = state.occasion;
-            select.onchange = (e) => {
-                state.occasion = e.target.value;
-                state.content.title = e.target.value;
-                // Force theme update if current theme isn't in new occasion list
+            // Smart URL Occasion Lock
+            const params = new URLSearchParams(window.location.search);
+            const urlOccasion = params.get('occasion');
+            const occasionContainer = document.getElementById('occasion-container');
+            
+            if (urlOccasion && OCCASIONS.includes(urlOccasion)) {
+                state.occasion = urlOccasion;
+                state.content.title = urlOccasion;
+                
+                // CRITICAL FIX: If the starting theme isn't allowed for this locked occasion, auto-switch to the first valid one!
                 const allowedThemes = OCCASION_THEMES[state.occasion];
                 if (!allowedThemes.includes(state.theme)) {
                     state.theme = allowedThemes[0];
                     state.paletteIndex = 0;
                 }
-                initUI(); // rebuild entire UI to map new buttons
-                renderPreview();
-            };
+
+                if (occasionContainer) {
+                    occasionContainer.innerHTML = `
+                        <div class="w-full p-2.5 text-base bg-gray-100 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed flex items-center justify-between">
+                            <span>${urlOccasion}</span>
+                            <span class="text-[10px] bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded font-bold uppercase tracking-wider">Locked</span>
+                        </div>
+                    `;
+                }
+            } else {
+                // Standard Occasion Filter Dropdown
+                if (occasionContainer && !document.getElementById('input-occasion')) {
+                    occasionContainer.innerHTML = `<select id="input-occasion" class="w-full p-2.5 text-base bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"></select>`;
+                }
+                
+                const select = document.getElementById('input-occasion');
+                if (select) {
+                    select.innerHTML = ''; 
+                    OCCASIONS.forEach(occ => select.add(new Option(occ, occ)));
+                    select.value = state.occasion;
+                    select.onchange = (e) => {
+                        state.occasion = e.target.value;
+                        state.content.title = e.target.value;
+                        // Force theme update if current theme isn't in new occasion list
+                        const allowedThemes = OCCASION_THEMES[state.occasion];
+                        if (!allowedThemes.includes(state.theme)) {
+                            state.theme = allowedThemes[0];
+                            state.paletteIndex = 0;
+                        }
+                        initUI(); // rebuild entire UI to map new buttons
+                        renderPreview();
+                    };
+                }
+            }
 
             // Theme Buttons (Filtered by Occasion)
             const themeContainer = document.getElementById('theme-buttons');
